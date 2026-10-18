@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jasur Wiki — Admin</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #101010;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    main {
+      max-width: 600px;
+      margin: 30px auto;
+    }
+    h1 { color: #ffd600; }
+    input, textarea, button {
+      width: 100%;
+      padding: 13px;
+      margin: 8px 0;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    input, textarea {
+      color: white;
+      background: #222;
+      border: 1px solid #444;
+    }
+    button {
+      border: 0;
+      background: #ffd600;
+      color: #111;
+      font-weight: bold;
+    }
+    #panel { display: none; }
+    #status { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Jasur Wiki Admin</h1>
+  <p>Email orqali kirish</p>
+
+  <section id="login">
+    <input id="email" type="email" placeholder="Admin email">
+    <input id="password" type="password" placeholder="Parol">
+    <button id="loginBtn">Kirish</button>
+    <button id="signupBtn">Akkaunt yaratish</button>
+  </section>
+
+  <section id="panel">
+    <h2>Kontent qo‘shish</h2>
+    <input id="section" placeholder="Bo‘lim: bio, yutuqlar, loyihalar, yangiliklar">
+    <input id="title" placeholder="Sarlavha">
+    <textarea id="content" placeholder="Matn"></textarea>
+    <input id="image" placeholder="Rasm URL (ixtiyoriy)">
+    <button id="saveBtn">Saqlash</button>
+    <button id="logoutBtn">Chiqish</button>
+  </section>
+
+  <p id="status" role="status"></p>
+</main>
+
+<script type="module">
+  import { createClient } from
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+  const SUPABASE_URL = 'https://nbbpengewjhbvcburydh.supabase.co/rest/v1/';
+  const SUPABASE_KEY = 'sb_publishable_kqXaCVM316G1CppA6_W0JQ_KHWpwrXm';
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const $ = id => document.getElementById(id);
+  const status = message => $('status').textContent = message;
+
+  async function refresh() {
+    const { data: { user } } = await supabase.auth.getUser();
+    $('login').style.display = user ? 'none' : 'block';
+    $('panel').style.display = user ? 'block' : 'none';
+  }
+
+  $('loginBtn').onclick = async () => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: $('email').value.trim(),
+      password: $('password').value
+    });
+    status(error ? error.message : 'Kirish muvaffaqiyatli!');
+    if (!error) await refresh();
+  };
+
+  $('signupBtn').onclick = async () => {
+    const { error } = await supabase.auth.signUp({
+      email: $('email').value.trim(),
+      password: $('password').value
+    });
+    status(error ? error.message :
+      'Ro‘yxatdan o‘tish so‘rovi yuborildi. Emailni tekshir.');
+  };
+
+  $('saveBtn').onclick = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return status('Avval tizimga kiring.');
+
+    const { error } = await supabase.from('wiki_content').insert({
+      section: $('section').value.trim(),
+      title: $('title').value.trim(),
+      content: $('content').value,
+      image_url: $('image').value.trim()
+    });
+
+    status(error ? error.message : 'Kontent saqlandi!');
+  };
+
+  $('logoutBtn').onclick = async () => {
+    await supabase.auth.signOut();
+    await refresh();
+    status('Tizimdan chiqdingiz.');
+  };
+
+  supabase.auth.onAuthStateChange(() => refresh());
+  await refresh();
+</script>
+</body>
+</html>
