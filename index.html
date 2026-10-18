@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jasur Wiki</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b0b0d;
+      color: white;
+    }
+    header {
+      padding: 22px 7%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #29292d;
+    }
+    .logo { font-size: 23px; font-weight: bold; }
+    .logo span { color: #ffd43b; }
+    nav a {
+      color: #ccc;
+      text-decoration: none;
+      margin-left: 16px;
+      font-size: 14px;
+    }
+    .hero {
+      min-height: 75vh;
+      padding: 90px 8%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: radial-gradient(ellipse at top right, #343019, #0b0b0d 65%);
+    }
+    .tag { color: #ffd43b; letter-spacing: 3px; }
+    h1 { font-size: clamp(42px, 9vw, 78px); margin: 18px 0; }
+    h1 span { color: #ffd43b; }
+    .hero p { color: #bbb; line-height: 1.8; max-width: 550px; }
+    .btn {
+      display: inline-block;
+      margin-top: 20px;
+      background: #ffd43b;
+      color: #111;
+      padding: 14px 22px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      width: fit-content;
+    }
+    section { padding: 55px 8%; }
+    h2 { font-size: 30px; }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: #17171b;
+      border: 1px solid #303036;
+      padding: 23px;
+      border-radius: 14px;
+    }
+    .card p { color: #aaa; line-height: 1.6; }
+    footer {
+      text-align: center;
+      padding: 25px;
+      color: #888;
+      border-top: 1px solid #29292d;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">JASUR<span>WIKI.</span></div>
+    <nav>
+      <a href="#about">Men haqimda</a>
+      <a href="#projects">Loyihalar</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div class="tag">SHAXSIY ENSIKLOPEDIYA</div>
+      <h1>Salom, men<br><span>Jasur.</span></h1>
+      <p>
+        Mening hayotim, yutuqlarim, loyihalarim
+        va kelajakdagi maqsadlarim haqidagi
+        shaxsiy sahifamga xush kelibsiz.
+      </p>
+      <a class="btn" href="#about">Men haqimda →</a>
+    </div>
+
+    <section id="about">
+      <h2>Men haqimda</h2>
+      <div class="card">
+        <p>Bu yerda mening biografiyam, qiziqishlarim
+        va maqsadlarim haqida ma'lumotlar bo‘ladi.</p>
+      </div>
+    </section>
+
+    <section id="projects">
+      <h2>Loyihalar va yutuqlar</h2>
+      <div class="cards">
+        <div class="card">
+          <h3>🚀 Loyihalar</h3>
+          <p>Men yaratayotgan texnologik loyihalar.</p>
+        </div>
+        <div class="card">
+          <h3>🏆 Yutuqlar</h3>
+          <p>Erishgan natijalarim va muvaffaqiyatlarim.</p>
+        </div>
+        <div class="card">
+          <h3>📰 Yangiliklar</h3>
+          <p>Faoliyatimdagi yangi voqealar.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>© 2026 Jasur Wiki · Barcha huquqlar himoyalangan</footer>
+</body>
+</html>
