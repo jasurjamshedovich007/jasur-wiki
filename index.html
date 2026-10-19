@@ -3,192 +3,262 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101010">
   <title>Jasur Wiki</title>
   <style>
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
+      background: #101010;
+      color: #f5f5f5;
       font-family: Arial, sans-serif;
-      background: #0b0b0d;
-      color: white;
     }
     header {
-      padding: 22px 7%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #29292d;
+      padding: 30px 18px;
+      text-align: center;
+      background: #171717;
+      border-bottom: 1px solid #333;
     }
-    .logo { font-size: 23px; font-weight: bold; }
-    .logo span { color: #ffd43b; }
-    nav a {
-      color: #ccc;
-      text-decoration: none;
-      margin-left: 16px;
-      font-size: 14px;
+    header h1 {
+      margin: 0;
+      color: #ffd600;
+      font-size: clamp(30px, 6vw, 48px);
     }
-    .hero {
-      min-height: 75vh;
-      padding: 90px 8%;
+    header p { color: #bbb; }
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 5;
       display: flex;
-      flex-direction: column;
+      flex-wrap: wrap;
       justify-content: center;
-      background: radial-gradient(ellipse at top right, #343019, #0b0b0d 65%);
+      gap: 8px;
+      padding: 12px;
+      background: #111;
+      border-bottom: 1px solid #333;
     }
-    .tag { color: #ffd43b; letter-spacing: 3px; }
-    h1 { font-size: clamp(42px, 9vw, 78px); margin: 18px 0; }
-    h1 span { color: #ffd43b; }
-    .hero p { color: #bbb; line-height: 1.8; max-width: 550px; }
-    .btn {
-      display: inline-block;
-      margin-top: 20px;
-      background: #ffd43b;
-      color: #111;
-      padding: 14px 22px;
-      border-radius: 8px;
-      text-decoration: none;
+    nav button, .back {
+      border: 1px solid #444;
+      border-radius: 9px;
+      padding: 11px 15px;
+      background: #222;
+      color: white;
       font-weight: bold;
-      width: fit-content;
+      cursor: pointer;
     }
-    section { padding: 55px 8%; }
-    h2 { font-size: 30px; }
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 16px;
+    nav button.active, nav button:hover,
+    .back:hover {
+      background: #ffd600;
+      color: #111;
     }
-    .card {
-      background: #17171b;
-      border: 1px solid #303036;
-      padding: 23px;
+    main {
+      width: min(900px, 100%);
+      margin: auto;
+      padding: 20px 16px 50px;
+    }
+    .intro, .article, .entry {
+      background: #191919;
+      border: 1px solid #333;
       border-radius: 14px;
+      padding: 20px;
+      margin: 16px 0;
     }
-    .card p { color: #aaa; line-height: 1.6; }
+    h2, .entry h3 { color: #ffd600; }
+    .entry {
+      display: block;
+      width: 100%;
+      text-align: left;
+      color: white;
+      cursor: pointer;
+      font: inherit;
+    }
+    .entry h3 { margin: 0 0 8px; }
+    .entry p, .muted { color: #bbb; line-height: 1.7; }
+    .entry:hover { border-color: #ffd600; }
+    .article { line-height: 1.8; overflow-wrap: anywhere; }
+    .article img {
+      display: block;
+      width: 100%;
+      max-height: 500px;
+      object-fit: contain;
+      border-radius: 12px;
+      margin: 20px 0;
+      background: #222;
+    }
+    .article-body { white-space: pre-wrap; }
+    .hidden { display: none !important; }
+    #status { color: #ffd600; line-height: 1.6; }
     footer {
       text-align: center;
-      padding: 25px;
+      padding: 24px;
       color: #888;
-      border-top: 1px solid #29292d;
+      border-top: 1px solid #333;
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="logo">JASUR<span>WIKI.</span></div>
-    <nav>
-      <a href="#about">Men haqimda</a>
-      <a href="#projects">Loyihalar</a>
-    </nav>
-  </header>
+<header>
+  <h1>JASUR WIKI</h1>
+  <p>Shaxsiy ensiklopediya · G‘oyalar · Loyihalar</p>
+</header>
 
-  <main>
-    <div class="hero">
-      <div class="tag">SHAXSIY ENSIKLOPEDIYA</div>
-      <h1>Salom, men<br><span>Jasur.</span></h1>
-      <p>
-        Mening hayotim, yutuqlarim, loyihalarim
-        va kelajakdagi maqsadlarim haqidagi
-        shaxsiy sahifamga xush kelibsiz.
+<nav aria-label="Asosiy menyu">
+  <button class="active" data-section="bio">Bio</button>
+  <button data-section="yutuqlar">Yutuqlar</button>
+  <button data-section="loyihalar">Loyihalar</button>
+  <button data-section="yangiliklar">Yangiliklar</button>
+</nav>
+
+<main>
+  <section id="home">
+    <div class="intro">
+      <h2>Jasur Wiki’ga xush kelibsiz!</h2>
+      <p class="muted">
+        Bo‘limni tanlang. Maqola sarlavhasini bosib,
+        uning to‘liq ma’lumotini o‘qing.
       </p>
-      <a class="btn" href="#about">Men haqimda →</a>
     </div>
+    <p id="status">Ma’lumotlar yuklanmoqda...</p>
+    <div id="list"></div>
+  </section>
 
-    <section id="about">
-      <h2>Men haqimda</h2>
-      <div class="card">
-        <p>Bu yerda mening biografiyam, qiziqishlarim
-        va maqsadlarim haqida ma'lumotlar bo‘ladi.</p>
-      </div>
-    </section>
+  <article id="detail" class="article hidden">
+    <button class="back" id="backBtn">← Orqaga</button>
+    <h2 id="detailTitle"></h2>
+    <img id="detailImage" class="hidden" alt="">
+    <div id="detailContent" class="article-body"></div>
+  </article>
+</main>
 
-    <section id="projects">
-      <h2>Loyihalar va yutuqlar</h2>
-      <div class="cards">
-        <div class="card">
-          <h3>🚀 Loyihalar</h3>
-          <p>Men yaratayotgan texnologik loyihalar.</p>
-        </div>
-        <div class="card">
-          <h3>🏆 Yutuqlar</h3>
-          <p>Erishgan natijalarim va muvaffaqiyatlarim.</p>
-        </div>
-        <div class="card">
-          <h3>📰 Yangiliklar</h3>
-          <p>Faoliyatimdagi yangi voqealar.</p>
-        </div>
-      </div>
-    </section>
-  </main>
+<footer>© Jasur Wiki</footer>
 
-  <footer>© 2026 Jasur Wiki · Barcha huquqlar himoyalangan</footer>
+<script type="module">
+  import { createClient } from
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-<section id="bio" style="
-  max-width: 900px;
-  margin: 35px auto;
-  padding: 28px;
-  background: #151515;
-  color: #f5f5f5;
-  border: 1px solid #333;
-  border-radius: 20px;
-  font-family: Arial, sans-serif;
-  box-shadow: 0 8px 30px #0003;
-">
-  <p style="
-    color: #ffd600;
-    font-weight: bold;
-    letter-spacing: 3px;
-    font-size: 13px;
-  ">JASUR WIKI / BIO</p>
+  const SUPABASE_URL =
+    'https://nbbpengewjhbvcburydh.supabase.co';
 
-  <h2 style="
-    font-size: 32px;
-    margin: 10px 0;
-    color: #ffd600;
-  ">Men haqimda</h2>
+  const SUPABASE_KEY =
+    'sb_publishable_kqXaCVM316G1CppA6_W0JQ_KHWpwrXm';
 
-  <p style="
-    color: #ccc;
-    font-size: 17px;
-    line-height: 1.8;
-  ">
-    Salom! Men Jasurman. Men yangi bilimlarni o‘rganishga,
-    zamonaviy texnologiyalar, dasturlash, muhandislik va
-    robototexnikaga qiziqaman.
-  </p>
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  <p style="
-    color: #ccc;
-    font-size: 17px;
-    line-height: 1.8;
-  ">
-    Men o‘z g‘oyalarimni haqiqiy loyihalarga aylantirishga,
-    muammolarga ijodiy yechim topishga va doimiy rivojlanishga
-    intilaman.
-  </p>
+  const labels = {
+    bio: 'Bio',
+    yutuqlar: 'Yutuqlar',
+    loyihalar: 'Loyihalar',
+    yangiliklar: 'Yangiliklar'
+  };
 
-  <div style="
-    margin-top: 24px;
-    padding: 18px;
-    background: #222;
-    border-left: 4px solid #ffd600;
-    border-radius: 10px;
-  ">
-    <h3 style="margin: 0 0 8px; color: #ffd600;">
-      Mening maqsadim
-    </h3>
-    <p style="margin: 0; line-height: 1.7; color: #eee;">
-      Kuchli muhandis bo‘lish, foydali texnologiyalar yaratish
-      va o‘z loyihalarim orqali yaxshi natijalarga erishish.
-    </p>
-  </div>
+  const $ = id => document.getElementById(id);
+  let allItems = [];
+  let currentSection = 'bio';
 
-  <p style="
-    margin-top: 22px;
-    color: #ffd600;
-    font-weight: bold;
-  ">O‘rganish. Yaratish. Rivojlanish.</p>
-</section>
+  function make(tag, className, text) {
+    const el = document.createElement(tag);
+    if (className) el.className = className;
+    if (text !== undefined) el.textContent = text;
+    return el;
+  }
 
+  function showList() {
+    $('detail').classList.add('hidden');
+    $('home').classList.remove('hidden');
+  }
+
+  function showArticle(item) {
+    $('home').classList.add('hidden');
+    $('detail').classList.remove('hidden');
+
+    $('detailTitle').textContent = item.title || '';
+    $('detailContent').textContent = item.content || '';
+
+    const img = $('detailImage');
+    img.classList.add('hidden');
+    img.removeAttribute('src');
+
+    if (item.image_url) {
+      try {
+        const url = new URL(item.image_url);
+        if (url.protocol === 'https:') {
+          img.src = url.href;
+          img.alt = item.title || 'Maqola rasmi';
+          img.classList.remove('hidden');
+          img.onerror = () => img.classList.add('hidden');
+        }
+      } catch {}
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function renderList() {
+    const list = $('list');
+    list.replaceChildren();
+
+    const items = allItems.filter(
+      item => item.section === currentSection
+    );
+
+    $('status').textContent = items.length
+      ? labels[currentSection] + ': ' + items.length + ' ta maqola'
+      : labels[currentSection] +
+        ' bo‘limida hali maqola yo‘q. Admin paneldan qo‘shish mumkin.';
+
+    items.forEach(item => {
+      const button = make('button', 'entry');
+      button.type = 'button';
+
+      button.append(
+        make('h3', '', item.title || 'Sarlavhasiz'),
+        make('p', '', 'To‘liq ma’lumotni o‘qish →')
+      );
+
+      button.addEventListener('click', () => showArticle(item));
+      list.append(button);
+    });
+  }
+
+  document.querySelectorAll('nav button').forEach(button => {
+    button.addEventListener('click', () => {
+      currentSection = button.dataset.section;
+
+      document.querySelectorAll('nav button').forEach(btn => {
+        btn.classList.toggle('active', btn === button);
+      });
+
+      showList();
+      renderList();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  $('backBtn').addEventListener('click', () => {
+    showList();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  async function loadContent() {
+    try {
+      const { data, error } = await supabase
+        .from('wiki_content')
+        .select('id, section, title, content, image_url, created_at')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      allItems = data || [];
+      renderList();
+    } catch (error) {
+      $('status').textContent =
+        'Ma’lumotlarni yuklashda xato: ' + error.message;
+    }
+  }
+
+  loadContent();
+</script>
 </body>
 </html>
