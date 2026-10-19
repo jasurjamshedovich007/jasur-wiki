@@ -2,223 +2,348 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Jasur Wiki — Admin</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 20px;
-      background: #101010;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
-    main { max-width: 600px; margin: 30px auto; }
-    h1 { color: #ffd600; }
-    input, textarea, select, button {
-      display: block;
-      width: 100%;
-      padding: 13px;
-      margin: 10px 0;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-    input, textarea, select {
-      background: #222;
-      color: white;
-      border: 1px solid #555;
-    }
-    button {
-      border: 0;
-      background: #ffd600;
-      color: #111;
-      font-weight: bold;
-    }
-    #panel { display: none; }
-    #status { overflow-wrap: anywhere; line-height: 1.5; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jasur Wiki — Admin</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:18px;background:#101010;color:#f5f5f5;font-family:Arial,sans-serif}
+main{max-width:700px;margin:25px auto}
+h1,h2{color:#ffd600}
+.card{background:#1b1b1b;border:1px solid #383838;border-radius:14px;padding:16px;margin:16px 0}
+input,textarea,select,button{display:block;width:100%;padding:13px;margin:10px 0;border-radius:8px;font-size:16px}
+input,textarea,select{background:#222;color:white;border:1px solid #555}
+button{border:0;background:#ffd600;color:#111;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5}
+.secondary{background:#333;color:white}
+.delete{background:#b3261e;color:white}
+.item{border:1px solid #444;border-radius:10px;padding:12px;margin:12px 0;overflow-wrap:anywhere}
+.item h3{margin:4px 0;color:#ffd600}
+.meta{color:#bbb;font-size:13px}
+#panel{display:none}
+#status{line-height:1.5;overflow-wrap:anywhere}
+.small{font-size:13px;color:#bbb}
+</style>
 </head>
 <body>
 <main>
-  <h1>Jasur Wiki Admin</h1>
+<h1>Jasur Wiki Admin</h1>
 
-  <section id="login">
-    <input id="email" type="email" placeholder="Admin email">
-    <input id="password" type="password" placeholder="Parol">
-    <button id="loginBtn">Kirish</button>
-  </section>
+<section id="login" class="card">
+<h2>Admin kirish</h2>
+<input id="email" type="email" placeholder="Admin email" autocomplete="username">
+<input id="password" type="password" placeholder="Parol" autocomplete="current-password">
+<button id="loginBtn">Kirish</button>
+</section>
 
-  <section id="panel" style="display:none">
-    <h2>Kontent qo‘shish</h2>
+<section id="panel" style="display:none">
+<div class="card">
+<h2>Kontent qo‘shish</h2>
+<label for="section">Bo‘lim</label>
+<select id="section">
+<option value="bio">Bio</option>
+<option value="yutuqlar">Yutuqlar</option>
+<option value="loyihalar">Loyihalar</option>
+<option value="yangiliklar">Yangiliklar</option>
+</select>
+<input id="title" placeholder="Sarlavha">
+<textarea id="content" rows="5" placeholder="To‘liq matn"></textarea>
+<input id="image" type="url" placeholder="Rasm URL (ixtiyoriy)">
+<button id="saveBtn">Saqlash</button>
+<button id="logoutBtn" class="secondary">Chiqish</button>
+</div>
 
-    <label for="section">Bo‘lim</label>
-    <select id="section">
-      <option value="bio">Bio</option>
-      <option value="yutuqlar">Yutuqlar</option>
-      <option value="loyihalar">Loyihalar</option>
-      <option value="yangiliklar">Yangiliklar</option>
-    </select>
+<div class="card">
+<h2>Kontentlarni boshqarish</h2>
+<label for="filter">Bo‘limni tanlang</label>
+<select id="filter">
+<option value="all">Barcha bo‘limlar</option>
+<option value="bio">Bio</option>
+<option value="yutuqlar">Yutuqlar</option>
+<option value="loyihalar">Loyihalar</option>
+<option value="yangiliklar">Yangiliklar</option>
+</select>
+<button id="refreshBtn" class="secondary">Ro‘yxatni yangilash</button>
+<p id="count" class="small"></p>
+<div id="items">Ro‘yxat yuklanmoqda...</div>
+</div>
+</section>
 
-    <input id="title" placeholder="Sarlavha">
-    <textarea id="content" rows="5" placeholder="Matn"></textarea>
-    <input id="image" type="url" placeholder="Rasm URL (ixtiyoriy)">
-    <button id="saveBtn">Saqlash</button>
-    <button id="logoutBtn">Chiqish</button>
-  </section>
-
-  <p id="status" role="status">Yuklanmoqda...</p>
+<p id="status" role="status">Ulanilmoqda...</p>
 </main>
 
 <script type="module">
 import { createClient } from
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-const SUPABASE_URL = 'https://nbbpengewjhbvcburydh.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_kqXaCVM316G1CppA6_W0JQ_KHWpwrXm';
-const ADMIN_ID = '8903470d-e2d2-470b-9e92-50cfa8fc5775';
+const SUPABASE_URL='https://nbbpengewjhbvcburydh.supabase.co';
+const SUPABASE_KEY='sb_publishable_kqXaCVM316G1CppA6_W0JQ_KHWpwrXm';
+const ADMIN_ID='8903470d-e2d2-470b-9e92-50cfa8fc5775';
 
-const $ = id => document.getElementById(id);
-const status = message => { $('status').textContent = message; };
+const $=id=>document.getElementById(id);
+const say=message=>{$('status').textContent=message};
+
+const labels={
+ bio:'Bio',
+ yutuqlar:'Yutuqlar',
+ loyihalar:'Loyihalar',
+ yangiliklar:'Yangiliklar'
+};
 
 let supabase;
+let entries=[];
 
-function showLogin() {
-  $('login').style.display = 'block';
-  $('panel').style.display = 'none';
+function showLogin(){
+ $('login').style.display='block';
+ $('panel').style.display='none';
 }
 
-function showPanel() {
-  $('login').style.display = 'none';
-  $('panel').style.display = 'block';
+function showPanel(){
+ $('login').style.display='none';
+ $('panel').style.display='block';
 }
 
-async function checkUser() {
-  const { data, error } = await supabase.auth.getUser();
+async function isAdmin(){
+ const {data,error}=await supabase.auth.getUser();
+ if(error || !data.user || data.user.id!==ADMIN_ID){
+  showLogin();
+  return false;
+ }
+ return true;
+}
 
-  if (error || !data.user) {
-    showLogin();
-    return false;
+async function loadEntries(){
+ if(!await isAdmin()){
+  say('Admin akkauntiga qayta kiring.');
+  return;
+ }
+
+ $('items').textContent='Yuklanmoqda...';
+ $('refreshBtn').disabled=true;
+
+ try{
+  const {data,error}=await supabase
+   .from('wiki_content')
+   .select('id,section,title,content,image_url,created_at')
+   .order('created_at',{ascending:false});
+
+  if(error){
+   $('items').textContent='Ro‘yxatni yuklab bo‘lmadi.';
+   say('Yuklash xatosi: '+error.message);
+   return;
   }
 
-  if (data.user.id !== ADMIN_ID) {
-    await supabase.auth.signOut();
-    showLogin();
-    status('Bu akkaunt administrator emas.');
-    return false;
+  entries=data||[];
+  renderEntries();
+ }catch(error){
+  say('Xatolik: '+error.message);
+ }finally{
+  $('refreshBtn').disabled=false;
+ }
+}
+
+function renderEntries(){
+ const selected=$('filter').value;
+ const filtered=entries.filter(item=>
+  selected==='all'||item.section===selected
+ );
+
+ $('count').textContent='Jami: '+filtered.length+' ta kontent';
+
+ const container=$('items');
+ container.replaceChildren();
+
+ if(!filtered.length){
+  const p=document.createElement('p');
+  p.textContent='Bu bo‘limda hozircha kontent yo‘q.';
+  container.appendChild(p);
+  return;
+ }
+
+ for(const item of filtered){
+  const card=document.createElement('article');
+  card.className='item';
+
+  const heading=document.createElement('h3');
+  heading.textContent=item.title||'Sarlavhasiz';
+
+  const meta=document.createElement('p');
+  meta.className='meta';
+  meta.textContent=(labels[item.section]||item.section)+' · ID: '+item.id;
+
+  const preview=document.createElement('p');
+  const fullText=item.content||'';
+  preview.textContent=fullText.length>180
+   ?fullText.slice(0,180)+'…'
+   :fullText;
+
+  const del=document.createElement('button');
+  del.className='delete';
+  del.textContent='🗑️ O‘chirish';
+  del.addEventListener('click',()=>deleteEntry(item));
+
+  card.append(heading,meta,preview,del);
+  container.appendChild(card);
+ }
+}
+
+async function deleteEntry(item){
+ const confirmed=confirm(
+  '«'+item.title+'» kontentini butunlay o‘chirmoqchimisiz?'
+ );
+ if(!confirmed)return;
+
+ if(!await isAdmin()){
+  say('O‘chirish uchun admin bo‘lib kiring.');
+  return;
+ }
+
+ say('O‘chirilmoqda...');
+
+ try{
+  const {data,error}=await supabase
+   .from('wiki_content')
+   .delete()
+   .eq('id',item.id)
+   .select('id');
+
+  if(error){
+   say('O‘chirish xatosi: '+error.message+
+    '. Supabase DELETE policy sozlamasini tekshiring.');
+   return;
+  }
+
+  if(!data||data.length===0){
+   say('Kontent o‘chmadi. Supabase ruxsat qoidalarini tekshiring.');
+   return;
+  }
+
+  say('Kontent o‘chirildi.');
+  await loadEntries();
+ }catch(error){
+  say('Xatolik: '+error.message);
+ }
+}
+
+$('loginBtn').addEventListener('click',async()=>{
+ const button=$('loginBtn');
+ const email=$('email').value.trim();
+ const password=$('password').value;
+
+ if(!email||!password){
+  say('Email va parolni kiriting.');
+  return;
+ }
+
+ button.disabled=true;
+ say('Kirilmoqda...');
+
+ try{
+  const {data,error}=await supabase.auth.signInWithPassword({
+   email,password
+  });
+
+  if(error){
+   say('Kirish xatosi: '+error.message);
+   return;
+  }
+
+  if(!data.user||data.user.id!==ADMIN_ID){
+   await supabase.auth.signOut();
+   showLogin();
+   say('Bu akkaunt administrator emas.');
+   return;
   }
 
   showPanel();
-  return true;
-}
+  say('Muvaffaqiyatli kirdingiz!');
+  await loadEntries();
+ }catch(error){
+  say('Xatolik: '+error.message);
+ }finally{
+  button.disabled=false;
+ }
+});
 
-$('loginBtn').addEventListener('click', async () => {
-  const button = $('loginBtn');
-  const email = $('email').value.trim();
-  const password = $('password').value;
+$('saveBtn').addEventListener('click',async()=>{
+ const button=$('saveBtn');
+ const title=$('title').value.trim();
+ const content=$('content').value.trim();
+ const image_url=$('image').value.trim();
 
-  if (!email || !password) {
-    status('Email va parolni kiriting.');
+ if(!title||!content){
+  say('Sarlavha va matnni kiriting.');
+  return;
+ }
+
+ if(image_url){
+  try{
+   if(new URL(image_url).protocol!=='https:'){
+    say('Rasm havolasi https:// bilan boshlansin.');
     return;
+   }
+  }catch{
+   say('Rasm URL noto‘g‘ri.');
+   return;
+  }
+ }
+
+ button.disabled=true;
+ say('Saqlanmoqda...');
+
+ try{
+  if(!await isAdmin()){
+   say('Admin akkauntiga qayta kiring.');
+   return;
   }
 
-  button.disabled = true;
-  status('Kirilmoqda...');
+  const {error}=await supabase.from('wiki_content').insert({
+   section:$('section').value,
+   title,
+   content,
+   image_url
+  });
 
-  try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) {
-      status('Kirish xatosi: ' + error.message);
-      return;
-    }
-
-    if (!data.user || data.user.id !== ADMIN_ID) {
-      await supabase.auth.signOut();
-      showLogin();
-      status('Bu akkaunt administrator sifatida ruxsat olmagan.');
-      return;
-    }
-
-    showPanel();
-    status('Muvaffaqiyatli kirdingiz!');
-  } catch (error) {
-    status('Xatolik: ' + error.message);
-  } finally {
-    button.disabled = false;
+  if(error){
+   say('Saqlash xatosi: '+error.message);
+   return;
   }
+
+  $('title').value='';
+  $('content').value='';
+  $('image').value='';
+  say('Kontent muvaffaqiyatli saqlandi!');
+  await loadEntries();
+ }catch(error){
+  say('Xatolik: '+error.message);
+ }finally{
+  button.disabled=false;
+ }
 });
 
-$('saveBtn').addEventListener('click', async () => {
-  const button = $('saveBtn');
-  const title = $('title').value.trim();
-  const content = $('content').value.trim();
-  const image_url = $('image').value.trim();
+$('refreshBtn').addEventListener('click',loadEntries);
+$('filter').addEventListener('change',renderEntries);
 
-  if (!title || !content) {
-    status('Sarlavha va matnni kiriting.');
-    return;
-  }
-
-  if (image_url) {
-    try {
-      if (new URL(image_url).protocol !== 'https:') {
-        status('Rasm havolasi https:// bilan boshlansin.');
-        return;
-      }
-    } catch {
-      status('Rasm URL noto‘g‘ri.');
-      return;
-    }
-  }
-
-  button.disabled = true;
-  status('Saqlanmoqda...');
-
-  try {
-    if (!await checkUser()) return;
-
-    const { error } = await supabase.from('wiki_content').insert({
-      section: $('section').value,
-      title,
-      content,
-      image_url
-    });
-
-    if (error) {
-      status('Saqlash xatosi: ' + error.message);
-      return;
-    }
-
-    $('title').value = '';
-    $('content').value = '';
-    $('image').value = '';
-    status('Kontent muvaffaqiyatli saqlandi!');
-  } catch (error) {
-    status('Xatolik: ' + error.message);
-  } finally {
-    button.disabled = false;
-  }
+$('logoutBtn').addEventListener('click',async()=>{
+ await supabase.auth.signOut();
+ showLogin();
+ say('Tizimdan chiqdingiz.');
 });
 
-$('logoutBtn').addEventListener('click', async () => {
-  const { error } = await supabase.auth.signOut();
-  showLogin();
-  status(error ? error.message : 'Tizimdan chiqdingiz.');
-});
-
-async function start() {
-  try {
-    supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-    const loggedIn = await checkUser();
-    if (loggedIn) status('Admin panel tayyor.');
-    else status('Email va parol bilan kiring.');
-  } catch (error) {
-    status('Ulanish xatosi: ' + error.message);
+async function start(){
+ try{
+  supabase=createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(await isAdmin()){
+   showPanel();
+   say('Admin panel tayyor.');
+   await loadEntries();
+  }else{
+   showLogin();
+   say('Email va parol bilan kiring.');
   }
+ }catch(error){
+  say('Ulanish xatosi: '+error.message);
+ }
 }
 
 start();
