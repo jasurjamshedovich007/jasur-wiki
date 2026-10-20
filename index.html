@@ -6,15 +6,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#071426">
 <title>Jasur Wiki</title>
-
 <style>
-:root {
-  --bg:#071426;
-  --panel:rgba(16,39,66,.92);
-  --gold:#f4ce70;
-  --text:#f4f7ff;
-  --muted:#b7c7dd;
-  --border:rgba(244,206,112,.3);
+:root{
+  --bg:#071426;--panel:#102742;--gold:#f4ce70;
+  --text:#f4f7ff;--muted:#b7c7dd;
+  --border:rgba(244,206,112,.25);--green:#76e0ad;
 }
 *{box-sizing:border-box}
 body{
@@ -24,152 +20,245 @@ body{
   linear-gradient(145deg,#050d19,#0a1b31 55%,#071426);
   background-attachment:fixed;
 }
-header{text-align:center;padding:35px 15px 25px;border-bottom:1px solid var(--border)}
-header h1{margin:0;color:var(--gold);font-size:clamp(34px,7vw,54px);letter-spacing:3px}
-header p{color:var(--muted)}
+header{text-align:center;padding:28px 14px 20px;border-bottom:1px solid var(--border)}
+header h1{margin:0;color:var(--gold);font-size:clamp(30px,7vw,48px);letter-spacing:2px}
+header p{color:var(--muted);margin:8px 0 0}
 nav{
   position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;
-  justify-content:center;gap:8px;padding:12px 8px;
-  background:rgba(5,15,28,.96);border-bottom:1px solid var(--border);
+  justify-content:center;gap:7px;padding:11px 8px;
+  background:rgba(5,15,28,.97);border-bottom:1px solid var(--border)
 }
-button,input{font:inherit}
-button{
-  cursor:pointer;transition:.2s;
-  -webkit-tap-highlight-color:transparent;
+button,input,textarea{font:inherit}
+button{cursor:pointer;transition:.18s;-webkit-tap-highlight-color:transparent}
+nav button,.btn,.back{
+  padding:10px 13px;border:1px solid var(--border);
+  border-radius:11px;background:#142d49;color:var(--text);font-weight:650
 }
-nav button,.action,.back{
-  padding:11px 15px;border:1px solid var(--border);
-  border-radius:11px;background:#142d49;color:var(--text);
-  font-weight:700;
+button:hover{border-color:var(--gold)}
+nav button.active,.btn.primary{background:var(--gold);color:#142033;border-color:var(--gold)}
+main{width:min(900px,100%);margin:auto;padding:20px 13px 45px;min-height:60vh}
+.panel,.post,.entry,.article{
+  background:rgba(16,39,66,.94);border:1px solid rgba(164,194,229,.17);
+  border-radius:16px;padding:18px;margin-bottom:14px;
+  box-shadow:0 10px 30px #0002;overflow-wrap:anywhere
 }
-nav button:hover,.action:hover,.back:hover{border-color:var(--gold);transform:translateY(-1px)}
-nav button.active{background:var(--gold);color:#142033}
-nav .auth-button{border-color:var(--gold);color:var(--gold)}
-nav .auth-button.primary{background:var(--gold);color:#142033}
-main{width:min(920px,100%);margin:auto;padding:24px 15px 50px;min-height:55vh}
-.intro,.article,.entry{
-  background:var(--panel);border:1px solid rgba(164,194,229,.17);
-  border-radius:17px;box-shadow:0 10px 30px #0002;
-}
-.intro{padding:22px;margin-bottom:20px}
-h2,.entry h3{color:var(--gold)}
-.muted,.entry p{color:var(--muted);line-height:1.8}
-#status{color:var(--gold);line-height:1.7;font-size:14px}
-#list{display:grid;gap:13px}
-.entry{display:block;width:100%;text-align:left;padding:18px;color:var(--text)}
-.entry h3{margin:0 0 8px}
-.entry p{margin:0}
-.article{padding:22px;line-height:1.8;overflow-wrap:anywhere}
-.article img{width:100%;max-height:450px;object-fit:contain;border-radius:12px;margin:15px 0}
-.article-body{white-space:pre-wrap}
-.back{margin-bottom:10px}
+h2,h3{color:var(--gold)}
+h2{margin-top:0}
+p{line-height:1.65}
+.muted,.subtle{color:var(--muted)}
 .hidden{display:none!important}
-footer{text-align:center;padding:25px;color:#9aabc2;font-size:13px;border-top:1px solid var(--border)}
-/* Kirish va ro'yxatdan o'tish oynasi */
+.field{display:grid;gap:6px;margin:12px 0}
+.field label{font-size:14px;color:var(--muted)}
+.field input,.field textarea,input.search{
+  width:100%;padding:12px;border-radius:10px;
+  border:1px solid #39516d;background:#071426;color:white
+}
+.field textarea{resize:vertical;min-height:95px}
+input:focus,textarea:focus{outline:2px solid var(--gold)}
+.btn{margin:4px 4px 4px 0}
+.btn.primary{font-weight:750}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.status{color:var(--gold);font-size:14px;overflow-wrap:anywhere}
+.small{font-size:13px;color:var(--muted)}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.row>*{min-width:0}
+.space{justify-content:space-between}
+.post-content{white-space:pre-wrap;overflow-wrap:anywhere}
+.post img{width:100%;max-height:430px;object-fit:contain;border-radius:12px;margin-top:10px}
+.avatar{
+  width:44px;height:44px;border-radius:50%;flex-shrink:0;
+  display:grid;place-items:center;background:#294768;color:var(--gold);
+  font-weight:800;font-size:19px
+}
+.user-card{padding:13px 0;border-bottom:1px solid #ffffff18}
+.user-card:last-child{border-bottom:0}
+.chat-list{display:grid;gap:7px;margin:12px 0}
+.chat-person{text-align:left;width:100%;padding:12px;border:1px solid var(--border);
+  border-radius:10px;background:#142d49;color:white}
+#messagesBox{
+  height:min(45vh,420px);overflow:auto;background:#071426;
+  border:1px solid #29415d;border-radius:12px;padding:10px
+}
+.bubble{padding:10px 12px;margin:8px 0;max-width:88%;border-radius:12px;background:#193957;white-space:pre-wrap;overflow-wrap:anywhere}
+.bubble.mine{margin-left:auto;background:#5d4d24}
+.bubble .small{display:block;margin-top:4px}
+.actions{display:flex;gap:5px;flex-wrap:wrap}
+.article{line-height:1.8}
+footer{text-align:center;padding:22px;color:#9aabc2;font-size:13px;border-top:1px solid var(--border)}
 .modal{
-  position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.78);
-  display:flex;align-items:center;justify-content:center;
-  padding:16px;overflow-y:auto;
+  position:fixed;inset:0;z-index:20;background:#000c;display:flex;
+  align-items:center;justify-content:center;padding:15px;overflow-y:auto
 }
 .modal-card{
-  width:min(430px,100%);padding:23px;border:1px solid var(--border);
-  border-radius:18px;background:#0b1b30;box-shadow:0 20px 70px #0008;
+  width:min(430px,100%);padding:22px;border:1px solid var(--border);
+  border-radius:18px;background:#0b1b30;box-shadow:0 20px 70px #0008
 }
 .modal-card h2{margin-top:0}
-.field{display:grid;gap:6px;margin:13px 0}
-.field label{font-size:14px;color:var(--muted)}
-.field input{
-  width:100%;padding:12px;border-radius:10px;
-  border:1px solid #39516d;background:#071426;color:white;
-}
-.field input:focus{outline:2px solid var(--gold)}
-.action{width:100%;margin-top:9px}
-.action.primary{background:var(--gold);color:#142033;border-color:var(--gold)}
 .modal-tools{display:flex;gap:8px;margin-top:12px}
 .modal-tools button{flex:1;padding:10px;border:1px solid var(--border);border-radius:9px;background:#142d49;color:white}
-#authMessage{font-size:14px;line-height:1.6;color:var(--gold);overflow-wrap:anywhere}
-#accountInfo{font-size:13px;color:var(--muted);max-width:100%;overflow-wrap:anywhere}
 @media(max-width:520px){
-  nav{gap:6px}
-  nav button{padding:9px 10px;font-size:13px}
-  main{padding:17px 11px 35px}
-  .intro,.article{padding:17px}
+  nav{gap:5px}nav button{padding:9px;font-size:13px}
+  main{padding:14px 9px 30px}.panel,.post,.entry,.article{padding:14px}
 }
 </style>
 </head>
-
 <body>
+
 <header>
   <h1>JASUR WIKI</h1>
-  <p>Shaxsiy ensiklopediya · G‘oyalar · Loyihalar</p>
+  <p>Profil · Do‘stlar · Postlar · Xabarlar</p>
 </header>
 
-<nav aria-label="Asosiy menyu">
-  <button class="active" data-section="bio">Bio</button>
-  <button data-section="yutuqlar">Yutuqlar</button>
-  <button data-section="loyihalar">Loyihalar</button>
-  <button data-section="yangiliklar">Yangiliklar</button>
-  <button class="auth-button primary" id="loginBtn">Kirish</button>
-  <button class="auth-button" id="registerBtn">Ro‘yxatdan o‘tish</button>
-  <button class="auth-button hidden" id="logoutBtn">Chiqish</button>
+<nav>
+  <button class="active" data-page="feed">🏠 Bosh sahifa</button>
+  <button data-page="search">🔎 Qidiruv</button>
+  <button data-page="friends">🤝 Do‘stlar</button>
+  <button data-page="chat">💬 Xabarlar</button>
+  <button data-page="profile">👤 Profilim</button>
+  <button id="loginBtn" class="active">Kirish</button>
+  <button id="registerBtn">Ro‘yxatdan o‘tish</button>
+  <button id="logoutBtn" class="hidden">Chiqish</button>
 </nav>
 
 <main>
-  <div id="accountInfo" class="hidden"></div>
+  <p id="globalStatus" class="status" role="status"></p>
 
-  <section id="home">
-    <div class="intro">
-      <h2>Jasur Wiki’ga xush kelibsiz!</h2>
-      <p class="muted">Bo‘limni tanlang. Maqola sarlavhasini bosib, to‘liq ma’lumotni o‘qing.</p>
+  <section id="page-feed">
+    <div class="panel">
+      <h2>Umumiy lenta</h2>
+      <p class="muted">Fikrlaringni ulash va boshqalarning postlarini ko‘r.</p>
     </div>
-    <p id="status">Ma’lumotlar yuklanmoqda...</p>
-    <div id="list"></div>
+    <form id="postForm" class="panel">
+      <h2>Yangi post</h2>
+      <div class="field">
+        <label for="postText">Nima haqida yozmoqchisan?</label>
+        <textarea id="postText" maxlength="3000" placeholder="Fikringni yoz..." required></textarea>
+      </div>
+      <div class="field">
+        <label for="postImage">Rasm URL (ixtiyoriy, HTTPS)</label>
+        <input id="postImage" type="url" placeholder="https://...">
+      </div>
+      <button class="btn primary" type="submit">Post joylash</button>
+      <p class="small">Post joylash uchun akkauntga kirgan bo‘lishing kerak.</p>
+    </form>
+    <div id="feedList"></div>
+    <button id="reloadFeed" class="btn">↻ Lentani yangilash</button>
   </section>
 
-  <article id="detail" class="article hidden">
-    <button class="back" id="backBtn">← Orqaga</button>
-    <h2 id="detailTitle"></h2>
-    <img id="detailImage" class="hidden" alt="">
-    <div id="detailContent" class="article-body"></div>
-  </article>
+  <section id="page-search" class="hidden">
+    <div class="panel">
+      <h2>Do‘st topish</h2>
+      <p class="muted">Ism yoki username orqali qidir.</p>
+      <form id="searchForm">
+        <div class="field">
+          <label for="searchQuery">Ism yoki username</label>
+          <input id="searchQuery" maxlength="40" required placeholder="Masalan, jasur123">
+        </div>
+        <button class="btn primary" type="submit">Qidirish</button>
+      </form>
+      <p id="searchStatus" class="status" role="status"></p>
+      <div id="searchResults"></div>
+    </div>
+  </section>
+
+  <section id="page-friends" class="hidden">
+    <div class="panel">
+      <h2>Do‘stlar</h2>
+      <button id="reloadFriends" class="btn">↻ Yangilash</button>
+      <h3>Kelgan so‘rovlar</h3>
+      <div id="incomingList"></div>
+      <h3>Yuborgan so‘rovlar</h3>
+      <div id="outgoingList"></div>
+      <h3>Do‘stlarim</h3>
+      <div id="friendsList"></div>
+      <p id="friendsStatus" class="status" role="status"></p>
+    </div>
+  </section>
+
+  <section id="page-chat" class="hidden">
+    <div class="panel">
+      <h2>Shaxsiy xabarlar</h2>
+      <p class="muted">Faqat do‘stlik so‘rovi qabul qilingan foydalanuvchilar bilan yozishish mumkin.</p>
+      <h3>Do‘st tanla</h3>
+      <div id="chatPeople" class="chat-list"></div>
+      <p id="chatStatus" class="status" role="status"></p>
+    </div>
+    <div id="chatPanel" class="panel hidden">
+      <h3 id="chatTitle">Suhbat</h3>
+      <div id="messagesBox" aria-live="polite"></div>
+      <form id="messageForm">
+        <div class="field">
+          <label for="messageText">Xabaring</label>
+          <textarea id="messageText" maxlength="2000" rows="2" required placeholder="Xabar yoz..."></textarea>
+        </div>
+        <button class="btn primary" type="submit">Yuborish</button>
+        <button class="btn" type="button" id="refreshMessages">Yangilash</button>
+      </form>
+    </div>
+  </section>
+
+  <section id="page-profile" class="hidden">
+    <div class="panel">
+      <h2>Mening profilim</h2>
+      <p id="profileEmail" class="muted"></p>
+      <form id="profileForm">
+        <div class="field">
+          <label for="profileName">Ko‘rinadigan ism</label>
+          <input id="profileName" maxlength="60" required>
+        </div>
+        <div class="field">
+          <label for="profileUsername">Username (o‘zgartirish hozircha yo‘q)</label>
+          <input id="profileUsername" disabled>
+        </div>
+        <div class="field">
+          <label for="profileBio">Bio</label>
+          <textarea id="profileBio" maxlength="500" placeholder="O‘zing haqingda..."></textarea>
+        </div>
+        <button class="btn primary" type="submit">Profilni saqlash</button>
+      </form>
+      <p id="profileStatus" class="status" role="status"></p>
+    </div>
+  </section>
+
+  <section id="page-wiki" class="hidden">
+    <article class="article">
+      <button id="wikiBack" class="btn">← Orqaga</button>
+      <h2 id="wikiTitle"></h2>
+      <img id="wikiImage" class="hidden" alt="" style="width:100%;max-height:430px;object-fit:contain">
+      <div id="wikiContent" style="white-space:pre-wrap"></div>
+    </article>
+  </section>
 </main>
 
-<!-- Kirish / ro'yxatdan o'tish oynasi -->
-<div id="authModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+<div id="authModal" class="modal hidden" role="dialog" aria-modal="true">
   <div class="modal-card">
-    <h2 id="authTitle">Jasur Wiki</h2>
-    <p id="authDescription" class="muted">Akkauntingizga kiring.</p>
-
+    <h2 id="authTitle">Akkauntga kirish</h2>
+    <p id="authDescription" class="muted">Email va parolingni kiriting.</p>
     <form id="authForm">
       <div id="nameFields" class="hidden">
         <div class="field">
           <label for="displayName">Ism</label>
-          <input id="displayName" type="text" maxlength="60" autocomplete="name" placeholder="Ismingiz">
+          <input id="displayName" maxlength="60" autocomplete="name">
         </div>
         <div class="field">
-          <label for="username">Foydalanuvchi nomi</label>
-          <input id="username" type="text" maxlength="30" autocomplete="username" placeholder="Masalan, jasur123">
+          <label for="username">Username</label>
+          <input id="username" maxlength="30" autocomplete="username" placeholder="jasur123">
         </div>
       </div>
-
       <div class="field">
         <label for="email">Email</label>
-        <input id="email" type="email" autocomplete="email" required placeholder="email@example.com">
+        <input id="email" type="email" autocomplete="email" required>
       </div>
-
       <div class="field">
-        <label for="password">Parol (kamida 6 ta belgi)</label>
-        <input id="password" type="password" minlength="6" autocomplete="current-password" required placeholder="Parolingiz">
+        <label for="password">Parol (kamida 6 belgi)</label>
+        <input id="password" type="password" minlength="6" autocomplete="current-password" required>
       </div>
-
-      <button class="action primary" id="submitAuth" type="submit">Kirish</button>
+      <button id="submitAuth" class="btn primary" type="submit">Kirish</button>
     </form>
-
-    <p id="authMessage" role="status" aria-live="polite"></p>
-
+    <p id="authMessage" class="status" role="status"></p>
     <div class="modal-tools">
-      <button type="button" id="switchAuth">Ro‘yxatdan o‘tish</button>
-      <button type="button" id="closeAuth">Yopish</button>
+      <button id="switchAuth" type="button">Ro‘yxatdan o‘tish</button>
+      <button id="closeAuth" type="button">Yopish</button>
     </div>
   </div>
 </div>
@@ -177,229 +266,504 @@ footer{text-align:center;padding:25px;color:#9aabc2;font-size:13px;border-top:1p
 <footer>© Jasur Wiki · Barcha huquqlar himoyalangan</footer>
 
 <script type="module">
-import { createClient } from
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const SUPABASE_URL = 'https://nbbpengewjhbvcburydh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_kqXaCVM316G1CppA6_W0JQ_KHWpwrXm';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
 const $ = id => document.getElementById(id);
 
-const labels = {
-  bio:'Bio',
-  yutuqlar:'Yutuqlar',
-  loyihalar:'Loyihalar',
-  yangiliklar:'Yangiliklar'
-};
+let currentUser = null;
+let myProfile = null;
+let activeChatUser = null;
+let wikiItems = [];
 
-let allItems = [];
-let currentSection = 'bio';
-let authMode = 'login';
-
-function make(tag, className, text) {
-  const el = document.createElement(tag);
-  if (className) el.className = className;
-  if (text !== undefined) el.textContent = text;
-  return el;
+function setStatus(id, message) {
+  $(id).textContent = message || '';
 }
-
-function showList() {
-  $('detail').classList.add('hidden');
-  $('home').classList.remove('hidden');
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
 }
-
-function showArticle(item) {
-  $('home').classList.add('hidden');
-  $('detail').classList.remove('hidden');
-  $('detailTitle').textContent = item.title || '';
-  $('detailContent').textContent = item.content || '';
-
-  const img = $('detailImage');
-  img.classList.add('hidden');
-  img.removeAttribute('src');
-
-  if (item.image_url) {
-    try {
-      const url = new URL(item.image_url);
-      if (url.protocol === 'https:') {
-        img.src = url.href;
-        img.alt = item.title || 'Maqola rasmi';
-        img.classList.remove('hidden');
-        img.onerror = () => img.classList.add('hidden');
-      }
-    } catch {}
-  }
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-
-function renderList() {
-  const list = $('list');
-  list.replaceChildren();
-
-  const items = allItems.filter(item => item.section === currentSection);
-
-  $('status').textContent = items.length
-    ? labels[currentSection] + ': ' + items.length + ' ta maqola'
-    : labels[currentSection] + ' bo‘limida hozircha maqola yo‘q.';
-
-  items.forEach(item => {
-    const button = make('button','entry');
-    button.type = 'button';
-    button.append(
-      make('h3','',item.title || 'Sarlavhasiz'),
-      make('p','','To‘liq ma’lumotni o‘qish →')
-    );
-    button.addEventListener('click',() => showArticle(item));
-    list.append(button);
-  });
-}
-
-document.querySelectorAll('nav button[data-section]').forEach(button => {
-  button.addEventListener('click',() => {
-    currentSection = button.dataset.section;
-    document.querySelectorAll('nav button[data-section]').forEach(btn => {
-      btn.classList.toggle('active',btn === button);
-    });
-    showList();
-    renderList();
-    window.scrollTo({top:0,behavior:'smooth'});
-  });
-});
-
-$('backBtn').addEventListener('click',() => {
-  showList();
-  window.scrollTo({top:0,behavior:'smooth'});
-});
-
-async function loadContent() {
+function safeHttps(url) {
   try {
-    const {data,error} = await supabase
-      .from('wiki_content')
-      .select('id, section, title, content, image_url, created_at')
-      .order('created_at',{ascending:false});
-
-    if (error) throw error;
-    allItems = data || [];
-    renderList();
-  } catch (error) {
-    $('status').textContent = 'Ma’lumotlarni yuklashda xato: ' + error.message;
-  }
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' ? parsed.href : '';
+  } catch { return ''; }
 }
+function formatDate(value) {
+  try {
+    return new Date(value).toLocaleString('uz-UZ', {
+      dateStyle:'short', timeStyle:'short'
+    });
+  } catch { return ''; }
+}
+function requireLogin() {
+  if (currentUser) return true;
+  openAuth('login');
+  setStatus('globalStatus','Davom etish uchun avval akkauntga kir.');
+  return false;
+}
+function setPage(page) {
+  document.querySelectorAll('main > section').forEach(section => {
+    section.classList.add('hidden');
+  });
+  $('page-' + page).classList.remove('hidden');
+  document.querySelectorAll('nav [data-page]').forEach(button => {
+    button.classList.toggle('active', button.dataset.page === page);
+  });
+  if (page === 'feed') loadFeed();
+  if (page === 'friends') loadFriends();
+  if (page === 'chat') loadChatPeople();
+  if (page === 'profile') loadMyProfile();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('nav [data-page]').forEach(button => {
+  button.addEventListener('click', () => setPage(button.dataset.page));
+});
 
-/* Auth oynasi */
+/* AUTH */
+let authMode = 'login';
 function openAuth(mode) {
   authMode = mode;
   $('authModal').classList.remove('hidden');
-  $('authMessage').textContent = '';
   $('authTitle').textContent = mode === 'login' ? 'Akkauntga kirish' : 'Yangi akkaunt';
   $('authDescription').textContent = mode === 'login'
-    ? 'Email va parolingizni kiriting.'
-    : 'Jasur Wiki uchun akkaunt yarating.';
-  $('nameFields').classList.toggle('hidden',mode !== 'register');
+    ? 'Email va parolingni kiriting.'
+    : 'Ism, username, email va parol kiriting.';
+  $('nameFields').classList.toggle('hidden', mode !== 'register');
   $('submitAuth').textContent = mode === 'login' ? 'Kirish' : 'Ro‘yxatdan o‘tish';
-  $('switchAuth').textContent = mode === 'login'
-    ? 'Ro‘yxatdan o‘tish'
-    : 'Kirish';
+  $('switchAuth').textContent = mode === 'login' ? 'Ro‘yxatdan o‘tish' : 'Kirish';
+  $('authMessage').textContent = '';
   $('password').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
 }
-
-$('loginBtn').addEventListener('click',() => openAuth('login'));
-$('registerBtn').addEventListener('click',() => openAuth('register'));
-$('closeAuth').addEventListener('click',() => $('authModal').classList.add('hidden'));
-$('switchAuth').addEventListener('click',() => {
-  openAuth(authMode === 'login' ? 'register' : 'login');
-});
-
-$('authModal').addEventListener('click',event => {
+$('loginBtn').addEventListener('click', () => openAuth('login'));
+$('registerBtn').addEventListener('click', () => openAuth('register'));
+$('closeAuth').addEventListener('click', () => $('authModal').classList.add('hidden'));
+$('switchAuth').addEventListener('click', () => openAuth(authMode === 'login' ? 'register' : 'login'));
+$('authModal').addEventListener('click', event => {
   if (event.target === $('authModal')) $('authModal').classList.add('hidden');
 });
 
-function showAccount(user) {
-  const signedIn = !!user;
-  $('loginBtn').classList.toggle('hidden',signedIn);
-  $('registerBtn').classList.toggle('hidden',signedIn);
-  $('logoutBtn').classList.toggle('hidden',!signedIn);
-  $('accountInfo').classList.toggle('hidden',!signedIn);
-  $('accountInfo').textContent = signedIn
-    ? 'Kirdingiz: ' + (user.email || 'foydalanuvchi')
-    : '';
-}
-
-$('authForm').addEventListener('submit',async event => {
+$('authForm').addEventListener('submit', async event => {
   event.preventDefault();
-  const email = $('email').value.trim();
-  const password = $('password').value;
   const submit = $('submitAuth');
-
   submit.disabled = true;
-  $('authMessage').textContent = 'Iltimos, kuting...';
-
+  setStatus('authMessage','Iltimos, kut...');
   try {
+    const email = $('email').value.trim();
+    const password = $('password').value;
     if (authMode === 'register') {
-      const username = $('username').value.trim();
       const displayName = $('displayName').value.trim();
+      const username = $('username').value.trim().toLowerCase();
+      if (!displayName || !username) throw new Error('Ism va username kiriting.');
+      if (!/^[a-z0-9_]{3,30}$/.test(username))
+        throw new Error('Username 3–30 belgi: lotin harflari, raqam yoki _ ishlating.');
 
-      if (!username || !displayName) {
-        throw new Error('Ism va foydalanuvchi nomini kiriting.');
-      }
-
-      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-        throw new Error('Foydalanuvchi nomida faqat lotin harflari, raqamlar va _ ishlating.');
-      }
+      const {data: existing, error: lookupError} = await supabase
+        .from('profiles').select('id').ilike('username', username).limit(1);
+      if (lookupError) throw lookupError;
+      if (existing?.length) throw new Error('Bu username band. Boshqasini tanlang.');
 
       const {data,error} = await supabase.auth.signUp({
-        email,
-        password,
-        options:{
-          data:{username,display_name:displayName}
-        }
+        email,password,
+        options:{data:{username,display_name:displayName}}
       });
-
       if (error) throw error;
-
       if (data.session) {
-        $('authMessage').textContent = 'Akkaunt yaratildi!';
         $('authModal').classList.add('hidden');
+        setStatus('globalStatus','Akkaunt yaratildi. Xush kelibsan!');
       } else {
-        $('authMessage').textContent =
-          'Ro‘yxatdan o‘tish so‘rovi yuborildi. Emailingizga tasdiqlash xati kelgan bo‘lsa, uni ochib tasdiqlang.';
+        setStatus('authMessage','Ro‘yxatdan o‘tish so‘rovi yuborildi. Email tasdiqlash talab qilinsa, pochtangni tekshir.');
       }
     } else {
       const {error} = await supabase.auth.signInWithPassword({email,password});
       if (error) throw error;
-      $('authMessage').textContent = 'Muvaffaqiyatli kirdingiz!';
       $('authModal').classList.add('hidden');
+      setStatus('globalStatus','Muvaffaqiyatli kirding!');
     }
   } catch (error) {
-    $('authMessage').textContent = 'Xato: ' + error.message;
+    setStatus('authMessage','Xato: ' + (error.message || 'Noma’lum xato'));
   } finally {
     submit.disabled = false;
   }
 });
-
-$('logoutBtn').addEventListener('click',async () => {
+$('logoutBtn').addEventListener('click', async () => {
   const {error} = await supabase.auth.signOut();
-  if (error) {
-    alert('Chiqishda xato: ' + error.message);
+  if (error) setStatus('globalStatus','Chiqishda xato: ' + error.message);
+  else setStatus('globalStatus','Akkauntdan chiqding.');
+});
+
+async function syncAuth(user) {
+  currentUser = user || null;
+  $('loginBtn').classList.toggle('hidden',!!currentUser);
+  $('registerBtn').classList.toggle('hidden',!!currentUser);
+  $('logoutBtn').classList.toggle('hidden',!currentUser);
+  $('profileEmail').textContent = currentUser ? currentUser.email || '' : '';
+  if (!currentUser) {
+    myProfile = null;
+    activeChatUser = null;
+    $('chatPanel').classList.add('hidden');
+  } else {
+    await loadMyProfile();
+  }
+}
+supabase.auth.onAuthStateChange((_event, session) => {
+  // Auth callback ichida boshqa auth so‘rovini kutmaymiz.
+  currentUser = session?.user || null;
+  $('loginBtn').classList.toggle('hidden',!!currentUser);
+  $('registerBtn').classList.toggle('hidden',!!currentUser);
+  $('logoutBtn').classList.toggle('hidden',!currentUser);
+  if (!currentUser) {
+    myProfile = null;
+    activeChatUser = null;
+    $('chatPanel').classList.add('hidden');
+  } else {
+    Promise.resolve().then(() => syncAuth(currentUser));
   }
 });
 
-supabase.auth.onAuthStateChange((_event,session) => {
-  showAccount(session?.user || null);
-});
-
-async function initAuth() {
-  const {data,error} = await supabase.auth.getSession();
+/* PROFILE */
+async function loadMyProfile() {
+  if (!currentUser) return;
+  const {data,error} = await supabase.from('profiles')
+    .select('id,user_id,username,display_name,bio,avatar_url')
+    .eq('user_id',currentUser.id).maybeSingle();
   if (error) {
-    $('authMessage').textContent = 'Akkaunt holatini tekshirib bo‘lmadi.';
+    setStatus('profileStatus','Profilni olishda xato: ' + error.message);
     return;
   }
-  showAccount(data.session?.user || null);
+  myProfile = data;
+  if (!data) {
+    setStatus('profileStatus','Profil topilmadi. Ro‘yxatdan o‘tish triggerini tekshirish kerak.');
+    return;
+  }
+  $('profileName').value = data.display_name || '';
+  $('profileUsername').value = data.username || '';
+  $('profileBio').value = data.bio || '';
+  $('profileEmail').textContent = currentUser.email || '';
+}
+$('profileForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!requireLogin()) return;
+  const display_name = $('profileName').value.trim();
+  const bio = $('profileBio').value.trim();
+  if (!display_name) return setStatus('profileStatus','Ismni kiriting.');
+  const {error} = await supabase.from('profiles')
+    .update({display_name,bio}).eq('id',currentUser.id);
+  if (error) setStatus('profileStatus','Saqlashda xato: ' + error.message);
+  else {
+    setStatus('profileStatus','Profil saqlandi!');
+    await loadMyProfile();
+  }
+});
+
+/* SEARCH */
+$('searchForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  const query = $('searchQuery').value.trim();
+  $('searchResults').replaceChildren();
+  if (query.length < 2) return setStatus('searchStatus','Kamida 2 ta belgi kiriting.');
+  if (!/^[\p{L}\p{N}_ .'-]+$/u.test(query))
+    return setStatus('searchStatus','Faqat ism yoki username kiriting.');
+  setStatus('searchStatus','Qidirilmoqda...');
+  try {
+    const {data,error} = await supabase.from('profiles')
+      .select('id,user_id,username,display_name,bio')
+      .or(`username.ilike.%${query}%,display_name.ilike.%${query}%`)
+      .limit(20);
+    if (error) throw error;
+    const users = (data || []).filter(u => u.user_id !== currentUser?.id && u.id !== currentUser?.id);
+    if (!users.length) return setStatus('searchStatus','Foydalanuvchi topilmadi.');
+    for (const user of users) {
+      const card = el('div','user-card');
+      const row = el('div','row');
+      const avatar = el('div','avatar',(user.display_name || user.username || '?').slice(0,1).toUpperCase());
+      const details = el('div','');
+      details.append(el('strong','',user.display_name || 'Foydalanuvchi'));
+      details.append(el('p','small',user.username ? '@'+user.username : 'Username yo‘q'));
+      if (user.bio) details.append(el('p','small',user.bio));
+      row.append(avatar,details);card.append(row);
+      const action = el('button','btn','Do‘stlik so‘rovi yuborish');
+      action.type = 'button';
+      action.addEventListener('click', () => sendFriendRequest(user));
+      card.append(action);
+      $('searchResults').append(card);
+    }
+    setStatus('searchStatus',users.length+' ta profil topildi.');
+  } catch(error) {
+    setStatus('searchStatus','Qidiruv xatosi: '+error.message);
+  }
+});
+
+async function sendFriendRequest(person) {
+  if (!requireLogin()) return;
+  try {
+    const {data: existing,error:readError} = await supabase.from('friendships')
+      .select('id,requester_id,addressee_id,status')
+      .or(`and(requester_id.eq.${currentUser.id},addressee_id.eq.${person.user_id}),and(requester_id.eq.${person.user_id},addressee_id.eq.${currentUser.id})`);
+    if (readError) throw readError;
+    if ((existing || []).some(f => f.status === 'accepted'))
+      return setStatus('searchStatus','Siz allaqachon do‘stsiz.');
+    if ((existing || []).some(f => f.status === 'pending'))
+      return setStatus('searchStatus','So‘rov allaqachon yuborilgan yoki javob kutilmoqda.');
+    const {error} = await supabase.from('friendships').insert({
+      requester_id:currentUser.id,addressee_id:person.user_id,status:'pending'
+    });
+    if (error) throw error;
+    setStatus('searchStatus','Do‘stlik so‘rovi yuborildi!');
+  } catch(error) {
+    setStatus('searchStatus','So‘rov xatosi: '+error.message);
+  }
 }
 
-initAuth();
-loadContent();
+/* FRIENDSHIPS */
+async function fetchFriendships() {
+  if (!currentUser) return [];
+  const {data,error} = await supabase.from('friendships')
+    .select('id,requester_id,addressee_id,status,created_at')
+    .or(`requester_id.eq.${currentUser.id},addressee_id.eq.${currentUser.id}`);
+  if (error) throw error;
+  return data || [];
+}
+async function profilesByIds(ids) {
+  const unique = [...new Set(ids.filter(Boolean))];
+  if (!unique.length) return {};
+  const {data,error} = await supabase.from('profiles')
+    .select('id,user_id,username,display_name,bio')
+    .in('user_id',unique);
+  if (error) throw error;
+  const map = {};
+  (data || []).forEach(p => { map[p.user_id] = p; });
+  return map;
+}
+function personName(p) {
+  return p?.display_name || (p?.username ? '@'+p.username : 'Foydalanuvchi');
+}
+async function loadFriends() {
+  $('incomingList').replaceChildren();
+  $('outgoingList').replaceChildren();
+  $('friendsList').replaceChildren();
+  if (!currentUser) return setStatus('friendsStatus','Do‘stlarni ko‘rish uchun akkauntga kir.');
+  setStatus('friendsStatus','Yuklanmoqda...');
+  try {
+    const rows = await fetchFriendships();
+    const map = await profilesByIds(rows.map(f =>
+      f.requester_id === currentUser.id ? f.addressee_id : f.requester_id
+    ));
+    const incoming = rows.filter(f => f.status === 'pending' && f.addressee_id === currentUser.id);
+    const outgoing = rows.filter(f => f.status === 'pending' && f.requester_id === currentUser.id);
+    const accepted = rows.filter(f => f.status === 'accepted');
+    const addEmpty = (target,msg) => $(target).append(el('p','small',msg));
+    if (!incoming.length) addEmpty('incomingList','Kelgan so‘rov yo‘q.');
+    incoming.forEach(f => {
+      const p = map[f.requester_id];
+      const card = el('div','user-card',personName(p));
+      const accept = el('button','btn primary','Qabul qilish');
+      accept.addEventListener('click',async () => {
+        const {error} = await supabase.from('friendships')
+          .update({status:'accepted'}).eq('id',f.id).eq('status','pending');
+        if (error) setStatus('friendsStatus','Qabul qilish xatosi: '+error.message);
+        else { setStatus('friendsStatus','Do‘stlik tasdiqlandi.'); await loadFriends(); }
+      });
+      card.append(accept);$('incomingList').append(card);
+    });
+    if (!outgoing.length) addEmpty('outgoingList','Yuborilgan so‘rov yo‘q.');
+    outgoing.forEach(f => $('outgoingList').append(el('div','user-card',personName(map[f.addressee_id]))));
+    if (!accepted.length) addEmpty('friendsList','Hozircha do‘st yo‘q.');
+    accepted.forEach(f => {
+      const id = f.requester_id === currentUser.id ? f.addressee_id : f.requester_id;
+      const card = el('div','user-card');
+      const row = el('div','row space');
+      row.append(el('strong','',personName(map[id])));
+      const chat = el('button','btn','Xabar yozish');
+      chat.addEventListener('click',() => { activeChatUser = map[id]; setPage('chat'); });
+      row.append(chat);card.append(row);$('friendsList').append(card);
+    });
+    setStatus('friendsStatus','Yangilandi.');
+  } catch(error) {
+    setStatus('friendsStatus','Xato: '+error.message);
+  }
+}
+$('reloadFriends').addEventListener('click',loadFriends);
+
+/* POSTS */
+async function loadFeed() {
+  $('feedList').replaceChildren();
+  try {
+    const {data:posts,error} = await supabase.from('posts')
+      .select('id,user_id,content,image_url,created_at')
+      .order('created_at',{ascending:false}).limit(50);
+    if (error) throw error;
+    const map = await profilesByIds((posts || []).map(p => p.user_id));
+    if (!posts?.length) {
+      $('feedList').append(el('div','panel','Hozircha post yo‘q. Birinchi postni sen joyla!'));
+      return;
+    }
+    posts.forEach(post => {
+      const card = el('article','post');
+      const head = el('div','row');
+      head.append(el('div','avatar',(personName(map[post.user_id]).slice(0,1)).toUpperCase()));
+      const who = el('div','');
+      who.append(el('strong','',personName(map[post.user_id])));
+      who.append(el('div','small',map[post.user_id]?.username ? '@'+map[post.user_id].username : ''));
+      who.append(el('div','small',formatDate(post.created_at)));
+      head.append(who);card.append(head);
+      card.append(el('p','post-content',post.content));
+      const imageUrl = safeHttps(post.image_url || '');
+      if (imageUrl) {
+        const img = el('img','');img.src = imageUrl;img.alt = 'Post rasmi';
+        img.onerror = () => img.remove();card.append(img);
+      }
+      if (currentUser?.id === post.user_id) {
+        const del = el('button','btn','Postni o‘chirish');
+        del.addEventListener('click',async () => {
+          if (!confirm('Postni o‘chirishni xohlaysanmi?')) return;
+          const {error} = await supabase.from('posts').delete().eq('id',post.id).eq('user_id',currentUser.id);
+          if (error) setStatus('globalStatus','O‘chirish xatosi: '+error.message);
+          else { setStatus('globalStatus','Post o‘chirildi.'); loadFeed(); }
+        });
+        card.append(del);
+      }
+      $('feedList').append(card);
+    });
+  } catch(error) {
+    $('feedList').append(el('p','status','Postlarni yuklash xatosi: '+error.message));
+  }
+}
+$('reloadFeed').addEventListener('click',loadFeed);
+$('postForm').addEventListener('submit',async event => {
+  event.preventDefault();
+  if (!requireLogin()) return;
+  const content = $('postText').value.trim();
+  const rawImage = $('postImage').value.trim();
+  const image_url = rawImage ? safeHttps(rawImage) : null;
+  if (!content) return setStatus('globalStatus','Post matnini kiriting.');
+  if (rawImage && !image_url) return setStatus('globalStatus','Rasm havolasi HTTPS bilan boshlanishi kerak.');
+  const button = $('postForm').querySelector('button[type="submit"]');
+  button.disabled = true;
+  try {
+    const {error} = await supabase.from('posts').insert({
+      user_id:currentUser.id,content,image_url
+    });
+    if (error) throw error;
+    $('postText').value='';$('postImage').value='';
+    setStatus('globalStatus','Post joylandi!');
+    await loadFeed();
+  } catch(error) {
+    setStatus('globalStatus','Post joylash xatosi: '+error.message);
+  } finally { button.disabled = false; }
+});
+
+/* CHAT */
+async function loadChatPeople() {
+  $('chatPeople').replaceChildren();
+  if (!currentUser) return setStatus('chatStatus','Xabarlar uchun akkauntga kir.');
+  try {
+    const rows = await fetchFriendships();
+    const accepted = rows.filter(f => f.status === 'accepted');
+    const ids = accepted.map(f => f.requester_id === currentUser.id ? f.addressee_id : f.requester_id);
+    const map = await profilesByIds(ids);
+    if (!ids.length) {
+      $('chatPeople').append(el('p','small','Chat uchun avval do‘st qo‘sh.'));
+      return;
+    }
+    ids.forEach(id => {
+      const person = map[id];
+      const button = el('button','chat-person',personName(person)+(person?.username ? ' · @'+person.username : ''));
+      button.addEventListener('click',() => openChat(person));
+      $('chatPeople').append(button);
+    });
+    if (activeChatUser) openChat(activeChatUser);
+  } catch(error) {
+    setStatus('chatStatus','Xato: '+error.message);
+  }
+}
+async function openChat(person) {
+  if (!person || !currentUser) return;
+  activeChatUser = person;
+  $('chatPanel').classList.remove('hidden');
+  $('chatTitle').textContent = 'Suhbat: '+personName(person);
+  await loadMessages();
+  $('chatPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function loadMessages() {
+  if (!currentUser || !activeChatUser) return;
+  $('messagesBox').replaceChildren();
+  const otherId = activeChatUser.user_id;
+  try {
+    const {data,error} = await supabase.from('messages')
+      .select('id,sender_id,receiver_id,content,created_at')
+      .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${currentUser.id})`)
+      .order('created_at',{ascending:true}).limit(200);
+    if (error) throw error;
+    if (!data?.length) $('messagesBox').append(el('p','small','Birinchi xabarni yubor!'));
+    (data || []).forEach(message => {
+      const bubble = el('div','bubble'+(message.sender_id === currentUser.id ? ' mine' : ''),message.content);
+      bubble.append(el('span','small',formatDate(message.created_at)));
+      $('messagesBox').append(bubble);
+    });
+    $('messagesBox').scrollTop = $('messagesBox').scrollHeight;
+    setStatus('chatStatus','');
+  } catch(error) {
+    setStatus('chatStatus','Xabarlarni yuklash xatosi: '+error.message);
+  }
+}
+$('messageForm').addEventListener('submit',async event => {
+  event.preventDefault();
+  if (!requireLogin() || !activeChatUser) return;
+  const content = $('messageText').value.trim();
+  if (!content) return;
+  const button = $('messageForm').querySelector('button[type="submit"]');
+  button.disabled = true;
+  try {
+    const {error} = await supabase.from('messages').insert({
+      sender_id:currentUser.id,receiver_id:activeChatUser.user_id,content
+    });
+    if (error) throw error;
+    $('messageText').value='';
+    await loadMessages();
+  } catch(error) {
+    setStatus('chatStatus','Xabar yuborish xatosi: '+error.message);
+  } finally { button.disabled = false; }
+});
+$('refreshMessages').addEventListener('click',loadMessages);
+
+/* ESKI WIKI MAQOLALARI */
+async function loadWiki() {
+  try {
+    const {data,error} = await supabase.from('wiki_content')
+      .select('id,section,title,content,image_url,created_at')
+      .order('created_at',{ascending:false});
+    if (error) throw error;
+    wikiItems = data || [];
+  } catch(error) {
+    console.warn('Wiki ma’lumotlarini olishda xato:',error.message);
+  }
+}
+function showWiki(item) {
+  document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+  $('page-wiki').classList.remove('hidden');
+  $('wikiTitle').textContent = item.title || '';
+  $('wikiContent').textContent = item.content || '';
+  const img = $('wikiImage');
+  img.classList.add('hidden');img.removeAttribute('src');
+  const url = safeHttps(item.image_url || '');
+  if (url) {img.src=url;img.alt=item.title || 'Maqola rasmi';img.classList.remove('hidden');}
+}
+$('wikiBack').addEventListener('click',() => setPage('feed'));
+
+/* Boshlang‘ich holat */
+async function init() {
+  const {data,error} = await supabase.auth.getSession();
+  if (error) setStatus('globalStatus','Akkaunt holatini tekshirishda xato: '+error.message);
+  await syncAuth(data?.session?.user || null);
+  await loadWiki();
+  await loadFeed();
+}
+init();
 </script>
 </body>
 </html>
