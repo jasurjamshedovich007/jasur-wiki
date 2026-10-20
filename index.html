@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="uz">
 <head>
@@ -30,7 +29,7 @@ nav{
 }
 button,input,textarea{font:inherit}
 button{cursor:pointer;transition:.18s;-webkit-tap-highlight-color:transparent}
-nav button,.btn,.back{
+nav button,.btn,.back,.profile-link{
   padding:10px 13px;border:1px solid var(--border);
   border-radius:11px;background:#142d49;color:var(--text);font-weight:650
 }
@@ -64,7 +63,9 @@ input:focus,textarea:focus{outline:2px solid var(--gold)}
 .row>*{min-width:0}
 .space{justify-content:space-between}
 .post-content{white-space:pre-wrap;overflow-wrap:anywhere}
-.post img{width:100%;max-height:430px;object-fit:contain;border-radius:12px;margin-top:10px}
+.post img,.public-post img{
+  width:100%;max-height:430px;object-fit:contain;border-radius:12px;margin-top:10px
+}
 .avatar{
   width:44px;height:44px;border-radius:50%;flex-shrink:0;
   display:grid;place-items:center;background:#294768;color:var(--gold);
@@ -96,6 +97,12 @@ footer{text-align:center;padding:22px;color:#9aabc2;font-size:13px;border-top:1p
 .modal-card h2{margin-top:0}
 .modal-tools{display:flex;gap:8px;margin-top:12px}
 .modal-tools button{flex:1;padding:10px;border:1px solid var(--border);border-radius:9px;background:#142d49;color:white}
+.profile-link{
+  display:inline-block;text-align:left;padding:7px 10px;
+  margin:3px 0;background:#142d49;color:var(--gold)
+}
+.profile-link:hover{background:#214364}
+.public-post{background:#0b1b30;border:1px solid #ffffff18;border-radius:13px;padding:14px;margin:12px 0}
 @media(max-width:520px){
   nav{gap:5px}nav button{padding:9px;font-size:13px}
   main{padding:14px 9px 30px}.panel,.post,.entry,.article{padding:14px}
@@ -220,6 +227,30 @@ footer{text-align:center;padding:22px;color:#9aabc2;font-size:13px;border-top:1p
     </div>
   </section>
 
+  <!-- YANGI: boshqa foydalanuvchining ochiq profili -->
+  <section id="page-public-profile" class="hidden">
+    <div class="panel">
+      <button id="publicProfileBack" class="btn">← Orqaga</button>
+      <div class="row" style="margin-top:14px">
+        <div id="publicProfileAvatar" class="avatar">?</div>
+        <div>
+          <h2 id="publicProfileName" style="margin:0 0 5px">Profil</h2>
+          <p id="publicProfileUsername" class="small"></p>
+        </div>
+      </div>
+      <p id="publicProfileBio" class="muted">Bio hali yozilmagan.</p>
+      <div class="actions">
+        <button id="publicProfileFriend" class="btn primary">🤝 Do‘stlik so‘rovi yuborish</button>
+        <button id="publicProfileChat" class="btn hidden">💬 Xabar yozish</button>
+      </div>
+      <p id="publicProfileStatus" class="status" role="status"></p>
+    </div>
+    <div class="panel">
+      <h2>📝 Postlari</h2>
+      <div id="publicProfilePosts"></div>
+    </div>
+  </section>
+
   <section id="page-wiki" class="hidden">
     <article class="article">
       <button id="wikiBack" class="btn">← Orqaga</button>
@@ -277,6 +308,8 @@ let currentUser = null;
 let myProfile = null;
 let activeChatUser = null;
 let wikiItems = [];
+let viewedProfile = null;
+let previousPage = 'search';
 
 function setStatus(id, message) {
   $(id).textContent = message || '';
@@ -411,7 +444,6 @@ async function syncAuth(user) {
   }
 }
 supabase.auth.onAuthStateChange((_event, session) => {
-  // Auth callback ichida boshqa auth so‘rovini kutmaymiz.
   currentUser = session?.user || null;
   $('loginBtn').classList.toggle('hidden',!!currentUser);
   $('registerBtn').classList.toggle('hidden',!!currentUser);
@@ -452,12 +484,143 @@ $('profileForm').addEventListener('submit', async event => {
   const bio = $('profileBio').value.trim();
   if (!display_name) return setStatus('profileStatus','Ismni kiriting.');
   const {error} = await supabase.from('profiles')
-    .update({display_name,bio}).eq('id',currentUser.id);
+    .update({display_name,bio}).eq('user_id',currentUser.id);
   if (error) setStatus('profileStatus','Saqlashda xato: ' + error.message);
   else {
     setStatus('profileStatus','Profil saqlandi!');
     await loadMyProfile();
   }
+});
+
+/* PROFIL UCHUN YORDAMCHI FUNKSIYALAR */
+function personName(p) {
+  return p?.display_name || (p?.username ? '@'+p.username : 'Foydalanuvchi');
+}
+
+async function openPublicProfile(person, fromPage) {
+  if (!person) return;
+
+  // user_id bo‘lmasa, profilni qayta aniqlashga harakat qilamiz
+  const targetId = person.user_id || person.id;
+  if (!targetId) {
+    setStatus('globalStatus','Bu profilning foydalanuvchi ID raqami topilmadi.');
+    return;
+  }
+
+  previousPage = fromPage || 'search';
+  viewedProfile = {...person, user_id:targetId};
+
+  document.querySelectorAll('main > section').forEach(section => {
+    section.classList.add('hidden');
+  });
+  $('page-public-profile').classList.remove('hidden');
+
+  $('publicProfileName').textContent = personName(person);
+  $('publicProfileUsername').textContent = person.username ? '@'+person.username : '';
+  $('publicProfileBio').textContent = person.bio || 'Bio hali yozilmagan.';
+  $('publicProfileAvatar').textContent =
+    personName(person).slice(0,1).toUpperCase();
+  $('publicProfilePosts').replaceChildren();
+  setStatus('publicProfileStatus','Postlar yuklanmoqda...');
+
+  const isMe = currentUser?.id === targetId;
+  $('publicProfileFriend').classList.toggle('hidden',isMe || !currentUser);
+  $('publicProfileChat').classList.add('hidden');
+
+  if (!currentUser) {
+    $('publicProfileFriend').classList.add('hidden');
+  }
+
+  if (currentUser && !isMe) {
+    try {
+      const {data:relations,error} = await supabase.from('friendships')
+        .select('id,requester_id,addressee_id,status')
+        .or(`and(requester_id.eq.${currentUser.id},addressee_id.eq.${targetId}),and(requester_id.eq.${targetId},addressee_id.eq.${currentUser.id})`);
+
+      if (!error && (relations || []).some(r => r.status === 'accepted')) {
+        $('publicProfileFriend').classList.add('hidden');
+        $('publicProfileChat').classList.remove('hidden');
+      } else if (!error && (relations || []).some(r => r.status === 'pending')) {
+        $('publicProfileFriend').textContent = '⏳ So‘rov kutilmoqda';
+        $('publicProfileFriend').disabled = true;
+      } else {
+        $('publicProfileFriend').textContent = '🤝 Do‘stlik so‘rovi yuborish';
+        $('publicProfileFriend').disabled = false;
+      }
+    } catch (e) {
+      console.warn('Do‘stlik holatini tekshirish:',e.message);
+    }
+  }
+
+  try {
+    const {data,error} = await supabase.from('posts')
+      .select('id,user_id,content,image_url,created_at')
+      .eq('user_id',targetId)
+      .order('created_at',{ascending:false})
+      .limit(50);
+
+    if (error) throw error;
+
+    if (!data?.length) {
+      setStatus('publicProfileStatus','Bu foydalanuvchida hali post yo‘q.');
+      return;
+    }
+
+    data.forEach(post => {
+      const card = el('article','public-post');
+      card.append(el('p','post-content',post.content || ''));
+
+      const imageUrl = safeHttps(post.image_url || '');
+      if (imageUrl) {
+        const img = el('img','');
+        img.src = imageUrl;
+        img.alt = 'Post rasmi';
+        img.onerror = () => img.remove();
+        card.append(img);
+      }
+
+      card.append(el('p','small',formatDate(post.created_at)));
+
+      if (currentUser?.id === post.user_id) {
+        const del = el('button','btn','Postni o‘chirish');
+        del.addEventListener('click',async () => {
+          if (!confirm('Postni o‘chirishni xohlaysanmi?')) return;
+          const {error:deleteError} = await supabase.from('posts')
+            .delete().eq('id',post.id).eq('user_id',currentUser.id);
+          if (deleteError) {
+            setStatus('publicProfileStatus','O‘chirish xatosi: '+deleteError.message);
+          } else {
+            setStatus('publicProfileStatus','Post o‘chirildi.');
+            await openPublicProfile(viewedProfile,previousPage);
+          }
+        });
+        card.append(del);
+      }
+      $('publicProfilePosts').append(card);
+    });
+
+    setStatus('publicProfileStatus',data.length+' ta post ko‘rsatildi.');
+  } catch(error) {
+    setStatus('publicProfileStatus','Postlarni yuklash xatosi: '+error.message);
+  }
+}
+
+$('publicProfileBack').addEventListener('click',() => {
+  setPage(previousPage || 'search');
+});
+
+$('publicProfileFriend').addEventListener('click',async () => {
+  if (!viewedProfile) return;
+  await sendFriendRequest(viewedProfile);
+  // So‘rov holatini yangilash
+  await openPublicProfile(viewedProfile,previousPage);
+});
+
+$('publicProfileChat').addEventListener('click',async () => {
+  if (!viewedProfile || !currentUser) return;
+  activeChatUser = viewedProfile;
+  setPage('chat');
+  await openChat(viewedProfile);
 });
 
 /* SEARCH */
@@ -469,30 +632,46 @@ $('searchForm').addEventListener('submit', async event => {
   if (!/^[\p{L}\p{N}_ .'-]+$/u.test(query))
     return setStatus('searchStatus','Faqat ism yoki username kiriting.');
   setStatus('searchStatus','Qidirilmoqda...');
+
   try {
     const {data,error} = await supabase.from('profiles')
       .select('id,user_id,username,display_name,bio')
       .or(`username.ilike.%${query}%,display_name.ilike.%${query}%`)
       .limit(20);
     if (error) throw error;
-    const users = (data || []).filter(u => u.user_id !== currentUser?.id && u.id !== currentUser?.id);
+
+    const users = (data || []).filter(u =>
+      u.user_id !== currentUser?.id && u.id !== currentUser?.id
+    );
+
     if (!users.length) return setStatus('searchStatus','Foydalanuvchi topilmadi.');
+
     for (const user of users) {
       const card = el('div','user-card');
       const row = el('div','row');
-      const avatar = el('div','avatar',(user.display_name || user.username || '?').slice(0,1).toUpperCase());
+      const avatar = el('div','avatar',
+        (user.display_name || user.username || '?').slice(0,1).toUpperCase()
+      );
       const details = el('div','');
-      details.append(el('strong','',user.display_name || 'Foydalanuvchi'));
+
+      // O‘ZGARTIRILDI: ismni bosish profilni ochadi
+      const profileButton = el('button','profile-link',personName(user));
+      profileButton.type = 'button';
+      profileButton.addEventListener('click',() => openPublicProfile(user,'search'));
+      details.append(profileButton);
+
       details.append(el('p','small',user.username ? '@'+user.username : 'Username yo‘q'));
       if (user.bio) details.append(el('p','small',user.bio));
-      row.append(avatar,details);card.append(row);
-      const action = el('button','btn','Do‘stlik so‘rovi yuborish');
+      row.append(avatar,details);
+      card.append(row);
+
+      const action = el('button','btn','🤝 Do‘stlik so‘rovi yuborish');
       action.type = 'button';
-      action.addEventListener('click', () => sendFriendRequest(user));
+      action.addEventListener('click',() => sendFriendRequest(user));
       card.append(action);
       $('searchResults').append(card);
     }
-    setStatus('searchStatus',users.length+' ta profil topildi.');
+    setStatus('searchStatus',users.length+' ta profil topildi. Profilini ochish uchun ismiga bos.');
   } catch(error) {
     setStatus('searchStatus','Qidiruv xatosi: '+error.message);
   }
@@ -500,22 +679,45 @@ $('searchForm').addEventListener('submit', async event => {
 
 async function sendFriendRequest(person) {
   if (!requireLogin()) return;
+  if (!person?.user_id) {
+    setStatus('searchStatus','Foydalanuvchi ID topilmadi.');
+    return;
+  }
+  if (person.user_id === currentUser.id) {
+    setStatus('searchStatus','O‘zingga do‘stlik so‘rovi yubora olmaysan.');
+    return;
+  }
+
   try {
-    const {data: existing,error:readError} = await supabase.from('friendships')
+    const {data:existing,error:readError} = await supabase.from('friendships')
       .select('id,requester_id,addressee_id,status')
       .or(`and(requester_id.eq.${currentUser.id},addressee_id.eq.${person.user_id}),and(requester_id.eq.${person.user_id},addressee_id.eq.${currentUser.id})`);
+
     if (readError) throw readError;
-    if ((existing || []).some(f => f.status === 'accepted'))
-      return setStatus('searchStatus','Siz allaqachon do‘stsiz.');
-    if ((existing || []).some(f => f.status === 'pending'))
-      return setStatus('searchStatus','So‘rov allaqachon yuborilgan yoki javob kutilmoqda.');
+
+    if ((existing || []).some(f => f.status === 'accepted')) {
+      setStatus('searchStatus','Siz allaqachon do‘stsiz.');
+      setStatus('publicProfileStatus','Siz allaqachon do‘stsiz.');
+      return;
+    }
+    if ((existing || []).some(f => f.status === 'pending')) {
+      setStatus('searchStatus','So‘rov allaqachon yuborilgan yoki javob kutilmoqda.');
+      setStatus('publicProfileStatus','Do‘stlik so‘rovi javobini kutmoqda.');
+      return;
+    }
+
     const {error} = await supabase.from('friendships').insert({
-      requester_id:currentUser.id,addressee_id:person.user_id,status:'pending'
+      requester_id:currentUser.id,
+      addressee_id:person.user_id,
+      status:'pending'
     });
     if (error) throw error;
+
     setStatus('searchStatus','Do‘stlik so‘rovi yuborildi!');
+    setStatus('publicProfileStatus','Do‘stlik so‘rovi yuborildi!');
   } catch(error) {
     setStatus('searchStatus','So‘rov xatosi: '+error.message);
+    setStatus('publicProfileStatus','So‘rov xatosi: '+error.message);
   }
 }
 
@@ -536,52 +738,86 @@ async function profilesByIds(ids) {
     .in('user_id',unique);
   if (error) throw error;
   const map = {};
-  (data || []).forEach(p => { map[p.user_id] = p; });
+  (data || []).forEach(p => {
+    map[p.user_id] = p;
+    // Ba’zi eski profillarda id va user_id farq qilsa ham topishga yordam beradi
+    map[p.id] = p;
+  });
   return map;
 }
-function personName(p) {
-  return p?.display_name || (p?.username ? '@'+p.username : 'Foydalanuvchi');
-}
+
 async function loadFriends() {
   $('incomingList').replaceChildren();
   $('outgoingList').replaceChildren();
   $('friendsList').replaceChildren();
+
   if (!currentUser) return setStatus('friendsStatus','Do‘stlarni ko‘rish uchun akkauntga kir.');
   setStatus('friendsStatus','Yuklanmoqda...');
+
   try {
     const rows = await fetchFriendships();
     const map = await profilesByIds(rows.map(f =>
       f.requester_id === currentUser.id ? f.addressee_id : f.requester_id
     ));
+
     const incoming = rows.filter(f => f.status === 'pending' && f.addressee_id === currentUser.id);
     const outgoing = rows.filter(f => f.status === 'pending' && f.requester_id === currentUser.id);
     const accepted = rows.filter(f => f.status === 'accepted');
     const addEmpty = (target,msg) => $(target).append(el('p','small',msg));
+
     if (!incoming.length) addEmpty('incomingList','Kelgan so‘rov yo‘q.');
     incoming.forEach(f => {
       const p = map[f.requester_id];
-      const card = el('div','user-card',personName(p));
+      const card = el('div','user-card');
+      const profileButton = el('button','profile-link',personName(p));
+      profileButton.addEventListener('click',() => openPublicProfile(p,'friends'));
+      card.append(profileButton);
+
       const accept = el('button','btn primary','Qabul qilish');
       accept.addEventListener('click',async () => {
         const {error} = await supabase.from('friendships')
           .update({status:'accepted'}).eq('id',f.id).eq('status','pending');
         if (error) setStatus('friendsStatus','Qabul qilish xatosi: '+error.message);
-        else { setStatus('friendsStatus','Do‘stlik tasdiqlandi.'); await loadFriends(); }
+        else {
+          setStatus('friendsStatus','Do‘stlik tasdiqlandi.');
+          await loadFriends();
+        }
       });
-      card.append(accept);$('incomingList').append(card);
+      card.append(accept);
+      $('incomingList').append(card);
     });
+
     if (!outgoing.length) addEmpty('outgoingList','Yuborilgan so‘rov yo‘q.');
-    outgoing.forEach(f => $('outgoingList').append(el('div','user-card',personName(map[f.addressee_id]))));
+    outgoing.forEach(f => {
+      const card = el('div','user-card');
+      const profileButton = el('button','profile-link',personName(map[f.addressee_id]));
+      profileButton.addEventListener('click',() => openPublicProfile(map[f.addressee_id],'friends'));
+      card.append(profileButton);
+      $('outgoingList').append(card);
+    });
+
     if (!accepted.length) addEmpty('friendsList','Hozircha do‘st yo‘q.');
     accepted.forEach(f => {
       const id = f.requester_id === currentUser.id ? f.addressee_id : f.requester_id;
+      const person = map[id];
       const card = el('div','user-card');
       const row = el('div','row space');
-      row.append(el('strong','',personName(map[id])));
-      const chat = el('button','btn','Xabar yozish');
-      chat.addEventListener('click',() => { activeChatUser = map[id]; setPage('chat'); });
-      row.append(chat);card.append(row);$('friendsList').append(card);
+
+      const profileButton = el('button','profile-link',personName(person));
+      profileButton.addEventListener('click',() => openPublicProfile(person,'friends'));
+      row.append(profileButton);
+
+      const chat = el('button','btn','💬 Xabar yozish');
+      chat.addEventListener('click',() => {
+        activeChatUser = person;
+        setPage('chat');
+        openChat(person);
+      });
+      row.append(chat);
+      card.append(row);
+      $('friendsList').append(card);
     });
+
     setStatus('friendsStatus','Yangilandi.');
   } catch(error) {
     setStatus('friendsStatus','Xato: '+error.message);
@@ -597,33 +833,53 @@ async function loadFeed() {
       .select('id,user_id,content,image_url,created_at')
       .order('created_at',{ascending:false}).limit(50);
     if (error) throw error;
+
     const map = await profilesByIds((posts || []).map(p => p.user_id));
+
     if (!posts?.length) {
       $('feedList').append(el('div','panel','Hozircha post yo‘q. Birinchi postni sen joyla!'));
       return;
     }
+
     posts.forEach(post => {
       const card = el('article','post');
       const head = el('div','row');
-      head.append(el('div','avatar',(personName(map[post.user_id]).slice(0,1)).toUpperCase()));
+      const person = map[post.user_id];
+
+      head.append(el('div','avatar',personName(person).slice(0,1).toUpperCase()));
       const who = el('div','');
-      who.append(el('strong','',personName(map[post.user_id])));
-      who.append(el('div','small',map[post.user_id]?.username ? '@'+map[post.user_id].username : ''));
+
+      // LENTADAGI ISM HAM BOSILADIGAN BO‘LDI
+      const profileButton = el('button','profile-link',personName(person));
+      profileButton.addEventListener('click',() => openPublicProfile(person,'feed'));
+      who.append(profileButton);
+
+      who.append(el('div','small',person?.username ? '@'+person.username : ''));
       who.append(el('div','small',formatDate(post.created_at)));
-      head.append(who);card.append(head);
+      head.append(who);
+      card.append(head);
       card.append(el('p','post-content',post.content));
+
       const imageUrl = safeHttps(post.image_url || '');
       if (imageUrl) {
-        const img = el('img','');img.src = imageUrl;img.alt = 'Post rasmi';
-        img.onerror = () => img.remove();card.append(img);
+        const img = el('img','');
+        img.src = imageUrl;
+        img.alt = 'Post rasmi';
+        img.onerror = () => img.remove();
+        card.append(img);
       }
+
       if (currentUser?.id === post.user_id) {
         const del = el('button','btn','Postni o‘chirish');
         del.addEventListener('click',async () => {
           if (!confirm('Postni o‘chirishni xohlaysanmi?')) return;
-          const {error} = await supabase.from('posts').delete().eq('id',post.id).eq('user_id',currentUser.id);
+          const {error} = await supabase.from('posts').delete()
+            .eq('id',post.id).eq('user_id',currentUser.id);
           if (error) setStatus('globalStatus','O‘chirish xatosi: '+error.message);
-          else { setStatus('globalStatus','Post o‘chirildi.'); loadFeed(); }
+          else {
+            setStatus('globalStatus','Post o‘chirildi.');
+            loadFeed();
+          }
         });
         card.append(del);
       }
@@ -634,6 +890,7 @@ async function loadFeed() {
   }
 }
 $('reloadFeed').addEventListener('click',loadFeed);
+
 $('postForm').addEventListener('submit',async event => {
   event.preventDefault();
   if (!requireLogin()) return;
@@ -642,6 +899,7 @@ $('postForm').addEventListener('submit',async event => {
   const image_url = rawImage ? safeHttps(rawImage) : null;
   if (!content) return setStatus('globalStatus','Post matnini kiriting.');
   if (rawImage && !image_url) return setStatus('globalStatus','Rasm havolasi HTTPS bilan boshlanishi kerak.');
+
   const button = $('postForm').querySelector('button[type="submit"]');
   button.disabled = true;
   try {
@@ -649,38 +907,48 @@ $('postForm').addEventListener('submit',async event => {
       user_id:currentUser.id,content,image_url
     });
     if (error) throw error;
-    $('postText').value='';$('postImage').value='';
+    $('postText').value='';
+    $('postImage').value='';
     setStatus('globalStatus','Post joylandi!');
     await loadFeed();
   } catch(error) {
     setStatus('globalStatus','Post joylash xatosi: '+error.message);
-  } finally { button.disabled = false; }
+  } finally {
+    button.disabled = false;
+  }
 });
 
 /* CHAT */
 async function loadChatPeople() {
   $('chatPeople').replaceChildren();
   if (!currentUser) return setStatus('chatStatus','Xabarlar uchun akkauntga kir.');
+
   try {
     const rows = await fetchFriendships();
     const accepted = rows.filter(f => f.status === 'accepted');
     const ids = accepted.map(f => f.requester_id === currentUser.id ? f.addressee_id : f.requester_id);
     const map = await profilesByIds(ids);
+
     if (!ids.length) {
       $('chatPeople').append(el('p','small','Chat uchun avval do‘st qo‘sh.'));
       return;
     }
+
     ids.forEach(id => {
       const person = map[id];
-      const button = el('button','chat-person',personName(person)+(person?.username ? ' · @'+person.username : ''));
+      const button = el('button','chat-person',
+        personName(person)+(person?.username ? ' · @'+person.username : '')
+      );
       button.addEventListener('click',() => openChat(person));
       $('chatPeople').append(button);
     });
+
     if (activeChatUser) openChat(activeChatUser);
   } catch(error) {
     setStatus('chatStatus','Xato: '+error.message);
   }
 }
+
 async function openChat(person) {
   if (!person || !currentUser) return;
   activeChatUser = person;
@@ -689,33 +957,39 @@ async function openChat(person) {
   await loadMessages();
   $('chatPanel').scrollIntoView({behavior:'smooth',block:'start'});
 }
+
 async function loadMessages() {
   if (!currentUser || !activeChatUser) return;
   $('messagesBox').replaceChildren();
   const otherId = activeChatUser.user_id;
+
   try {
     const {data,error} = await supabase.from('messages')
       .select('id,sender_id,receiver_id,content,created_at')
       .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${currentUser.id})`)
       .order('created_at',{ascending:true}).limit(200);
     if (error) throw error;
+
     if (!data?.length) $('messagesBox').append(el('p','small','Birinchi xabarni yubor!'));
     (data || []).forEach(message => {
       const bubble = el('div','bubble'+(message.sender_id === currentUser.id ? ' mine' : ''),message.content);
       bubble.append(el('span','small',formatDate(message.created_at)));
       $('messagesBox').append(bubble);
     });
+
     $('messagesBox').scrollTop = $('messagesBox').scrollHeight;
     setStatus('chatStatus','');
   } catch(error) {
     setStatus('chatStatus','Xabarlarni yuklash xatosi: '+error.message);
   }
 }
+
 $('messageForm').addEventListener('submit',async event => {
   event.preventDefault();
   if (!requireLogin() || !activeChatUser) return;
   const content = $('messageText').value.trim();
   if (!content) return;
+
   const button = $('messageForm').querySelector('button[type="submit"]');
   button.disabled = true;
   try {
@@ -727,7 +1001,9 @@ $('messageForm').addEventListener('submit',async event => {
     await loadMessages();
   } catch(error) {
     setStatus('chatStatus','Xabar yuborish xatosi: '+error.message);
-  } finally { button.disabled = false; }
+  } finally {
+    button.disabled = false;
+  }
 });
 $('refreshMessages').addEventListener('click',loadMessages);
 
@@ -749,13 +1025,18 @@ function showWiki(item) {
   $('wikiTitle').textContent = item.title || '';
   $('wikiContent').textContent = item.content || '';
   const img = $('wikiImage');
-  img.classList.add('hidden');img.removeAttribute('src');
+  img.classList.add('hidden');
+  img.removeAttribute('src');
   const url = safeHttps(item.image_url || '');
-  if (url) {img.src=url;img.alt=item.title || 'Maqola rasmi';img.classList.remove('hidden');}
+  if (url) {
+    img.src=url;
+    img.alt=item.title || 'Maqola rasmi';
+    img.classList.remove('hidden');
+  }
 }
 $('wikiBack').addEventListener('click',() => setPage('feed'));
 
-/* Boshlang‘ich holat */
+/* BOSHLANG‘ICH HOLAT */
 async function init() {
   const {data,error} = await supabase.auth.getSession();
   if (error) setStatus('globalStatus','Akkaunt holatini tekshirishda xato: '+error.message);
