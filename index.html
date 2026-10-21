@@ -3,274 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#071426">
     <title>SchoolHub - O'quvchilar Ijtimoiy Tarmog'i</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        :root {
+            --bg: #071426;
+            --panel: rgba(16,39,66,.92);
+            --gold: #f4ce70;
+            --text: #f4f7ff;
+            --muted: #b7c7dd;
+            --border: rgba(244,206,112,.3);
+        }
+        body {
+            margin: 0; min-height: 100vh; color: var(--text);
+            font-family: system-ui, Arial, sans-serif;
+            background: radial-gradient(ellipse at 10% 10%,#173b60,transparent 45%),
+                        linear-gradient(145deg,#050d19,#0a1b31 55%,#071426);
+            background-attachment: fixed;
+        }
         .bg-slider {
             transition: background-image 1.2s ease-in-out;
             background-size: cover;
             background-position: center;
         }
         .glass {
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid var(--border);
         }
         .flip-card { cursor: pointer; transition: transform 0.3s; }
         .flip-card:active { transform: scale(0.97); }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen font-sans">
 
-    <!-- 1. RO'YXATDAN O'TISH OYNASI (Orqa fonda 4 ta rasm aylanadi) -->
-    <div id="authScreen" class="bg-slider min-h-screen flex items-center justify-center p-4">
+    <!-- 1. RO'YXATDAN O'TISH / KIRISH MODAL OYNASI -->
+    <div id="authScreen" class="bg-slider fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="glass p-8 rounded-3xl shadow-2xl w-full max-w-md">
             <div class="text-center mb-6">
-                <h1 class="text-3xl font-extrabold text-blue-400"><i class="fa-solid fa-graduation-cap"></i> SchoolHub</h1>
-                <p class="text-sm text-gray-300 mt-1">Maktab o'quvchilari uchun maxsus platforma</p>
+                <h1 class="text-3xl font-extrabold text-amber-400"><i class="fa-solid fa-graduation-cap"></i> SchoolHub</h1>
+                <p id="authSubtitle" class="text-sm text-gray-300 mt-1">Maktab o'quvchilari uchun maxsus platforma</p>
             </div>
 
             <div class="space-y-4">
-                <div>
+                <div id="usernameField" class="hidden">
                     <label class="text-xs text-gray-300">Takrorlanmas Username</label>
                     <div class="flex items-center bg-slate-800/80 rounded-xl px-3 py-2 mt-1 border border-slate-600">
-                        <span class="text-blue-400 font-bold mr-1">@</span>
-                        <input id="usernameInput" type="text" placeholder="masalan: sardor_07" class="bg-transparent w-full focus:outline-none text-sm">
+                        <span class="text-amber-400 font-bold mr-1">@</span>
+                        <input id="usernameInput" type="text" placeholder="masalan: sardor_07" class="bg-transparent w-full focus:outline-none text-sm text-white">
                     </div>
                 </div>
                 <div>
                     <label class="text-xs text-gray-300">Email manzilingiz</label>
-                    <input type="email" placeholder="oquvchi@gmail.com" class="w-full bg-slate-800/80 rounded-xl px-3 py-2 mt-1 border border-slate-600 focus:outline-none text-sm">
+                    <input id="emailInput" type="email" placeholder="oquvchi@gmail.com" class="w-full bg-slate-800/80 rounded-xl px-3 py-2 mt-1 border border-slate-600 focus:outline-none text-sm text-white">
                 </div>
                 <div>
                     <label class="text-xs text-gray-300">Parol</label>
-                    <input type="password" placeholder="••••••••" class="w-full bg-slate-800/80 rounded-xl px-3 py-2 mt-1 border border-slate-600 focus:outline-none text-sm">
+                    <input id="passwordInput" type="password" placeholder="••••••••" class="w-full bg-slate-800/80 rounded-xl px-3 py-2 mt-1 border border-slate-600 focus:outline-none text-sm text-white">
                 </div>
-                <button onclick="enterSite()" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg transition">
-                    Ro'yxatdan o'tish / Kirish
+                
+                <button id="authSubmitBtn" onclick="handleAuth()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-slate-950 font-extrabold py-3 rounded-xl shadow-lg transition">
+                    Kirish
                 </button>
+                
+                <button onclick="toggleAuthMode()" id="switchAuthBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-gray-300 font-bold py-2.5 rounded-xl text-sm transition">
+                    Akkauntingiz yo'qmi? Ro'yxatdan o'tish
+                </button>
+                <p id="authMessage" class="text-xs text-center text-amber-300 mt-2"></p>
             </div>
         </div>
     </div>
 
-    <!-- 2. ASOSIY PLATFORM (Kirgandan keyingi ko'rinish) -->
+    <!-- 2. ASOSIY PLATFORM (Kirgandan keyin ochiladi) -->
     <div id="mainApp" class="hidden min-h-screen flex flex-col">
-        <!-- Tepada navigatsiya va Tokenlar -->
-        <header class="bg-slate-800 border-b border-slate-700 px-4 py-3 flex justify-between items-center sticky top-0 z-50">
+        <header class="bg-slate-800 border-b border-slate-700 px-4 py-3 flex justify-between items-center sticky top-0 z-40">
             <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-graduation-cap text-blue-400 text-2xl"></i>
-                <span class="font-bold text-lg">SchoolHub</span>
+                <i class="fa-solid fa-graduation-cap text-amber-400 text-2xl"></i>
+                <span class="font-bold text-lg text-amber-400">SchoolHub</span>
             </div>
             <div class="flex items-center space-x-3">
                 <div class="bg-amber-500/20 border border-amber-400 text-amber-300 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1">
                     <i class="fa-solid fa-coins"></i> <span id="tokenCount">35</span> Token
                 </div>
-                <div id="userBadge" class="bg-slate-700 px-3 py-1 rounded-full text-sm font-medium">
-                    @oquvchi <span id="vipIcon" class="hidden text-blue-400"><i class="fa-solid fa-circle-check"></i></span>
-                </div>
-            </div>
-        </header>
-
-        <!-- BSB va CHSB Taymerlari (Admin boshqaradi) -->
-        <div class="bg-gradient-to-r from-indigo-900 via-slate-800 to-blue-900 p-4 border-b border-slate-700">
-            <div class="max-w-5xl mx-auto grid grid-cols-3 gap-3 text-center">
-                <div class="bg-slate-900/60 p-3 rounded-2xl border border-blue-500/30">
-                    <p class="text-xs text-blue-300 uppercase font-bold">1-BSB imtihoniga</p>
-                    <p class="text-xl md:text-2xl font-extrabold text-white mt-1">12 kun</p>
-                </div>
-                <div class="bg-slate-900/60 p-3 rounded-2xl border border-purple-500/30">
-                    <p class="text-xs text-purple-300 uppercase font-bold">2-BSB imtihoniga</p>
-                    <p class="text-xl md:text-2xl font-extrabold text-white mt-1">28 kun</p>
-                </div>
-                <div class="bg-slate-900/60 p-3 rounded-2xl border border-rose-500/30">
-                    <p class="text-xs text-rose-300 uppercase font-bold">CHSB imtihoniga</p>
-                    <p class="text-xl md:text-2xl font-extrabold text-white mt-1">45 kun</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bo'limlar tugmalari -->
-        <div class="max-w-5xl w-full mx-auto px-4 mt-4 flex gap-2 overflow-x-auto pb-2">
-            <button onclick="showTab('feed')" class="bg-blue-600 px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap"><i class="fa-solid fa-newspaper mr-1"></i> Postlar & Chat</button>
-            <button onclick="showTab('books')" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap"><i class="fa-solid fa-book-open mr-1"></i> PDF Kitoblar & Yechim</button>
-            <button onclick="showTab('english')" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap"><i class="fa-solid fa-language mr-1"></i> Flashcards & Lug'at</button>
-            <button onclick="showTab('shop')" class="bg-amber-600 hover:bg-amber-500 px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap"><i class="fa-solid fa-crown mr-1"></i> Token Do'kon</button>
-            <button onclick="showTab('chess')" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap"><i class="fa-solid fa-chess mr-1"></i> Shaxmat</button>
-        </div>
-
-        <!-- Asosiy Kontent Maydoni -->
-        <main class="max-w-5xl w-full mx-auto p-4 flex-1">
-            
-            <!-- 1. POSTLAR VA CHAT -->
-            <div id="tab-feed" class="grid md:grid-cols-3 gap-4">
-                <div class="md:col-span-2 space-y-4">
-                    <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
-                        <textarea id="postInput" placeholder="Maktabdagi yangilik yoki e'lon yozing (+5 Token beriladi)..." class="w-full bg-slate-900 rounded-xl p-3 text-sm focus:outline-none"></textarea>
-                        <div class="flex justify-between items-center mt-2">
-                            <button class="text-blue-400 text-sm"><i class="fa-solid fa-image"></i> Rasm qo'shish</button>
-                            <button onclick="addPost()" class="bg-blue-600 px-4 py-1.5 rounded-xl text-sm font-bold">Joylashtirish (+5 🪙)</button>
-                        </div>
-                    </div>
-                    <div id="postsList" class="space-y-3">
-                        <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
-                            <div class="flex justify-between">
-                                <span class="font-bold text-blue-400">@ali_coder <i class="fa-solid fa-circle-check text-xs"></i></span>
-                                <span class="text-xs text-gray-400">10 daqiqa oldin</span>
-                            </div>
-                            <p class="text-sm mt-2">Ertaga 9-sinflar o'rtasida shaxmat turniri bo'ladi! Kim qatnashadi?</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Do'stlar va Chat -->
-                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 h-fit">
-                    <h3 class="font-bold mb-3"><i class="fa-solid fa-user-group text-green-400"></i> Onlayn Do'stlar</h3>
-                    <div class="space-y-2 text-sm">
-                        <div class="flex justify-between items-center bg-slate-900 p-2 rounded-xl">
-                            <span>@malika_9a</span>
-                            <button class="bg-blue-600 px-2 py-1 rounded-lg text-xs">Yozish</button>
-                        </div>
-                        <div class="flex justify-between items-center bg-slate-900 p-2 rounded-xl">
-                            <span>@javohir_math</span>
-                            <button class="bg-slate-700 px-2 py-1 rounded-lg text-xs">+ Do'st</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 2. PDF KITOBLAR VA YECHIMLAR -->
-            <div id="tab-books" class="hidden grid md:grid-cols-2 gap-4">
-                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex justify-between items-center">
-                    <div>
-                        <h4 class="font-bold">Algebra 9-sinf (PDF + Yechimlar)</h4>
-                        <p class="text-xs text-gray-400">Barcha BSB mavzulari javoblari bilan</p>
-                    </div>
-                    <button class="bg-blue-600 px-3 py-2 rounded-xl text-xs font-bold">Yuklash</button>
-                </div>
-                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex justify-between items-center">
-                    <div>
-                        <h4 class="font-bold">Ingliz tili Workbook javoblari</h4>
-                        <p class="text-xs text-gray-400">Unit 1 - Unit 10 to'liq yechim</p>
-                    </div>
-                    <button class="bg-blue-600 px-3 py-2 rounded-xl text-xs font-bold">Ko'rish</button>
-                </div>
-            </div>
-
-            <!-- 3. INGLIZ TILI FLASHCARDS -->
-            <div id="tab-english" class="hidden max-w-md mx-auto text-center space-y-4">
-                <h3 class="font-bold text-lg">So'z yodlash (Kartochkani bosing)</h3>
-                <div onclick="flipCard()" id="flashcard" class="flip-card bg-gradient-to-br from-blue-600 to-indigo-800 p-10 rounded-3xl shadow-xl text-2xl font-extrabold">
-                    Abundant
-                </div>
-                <p class="text-xs text-gray-400">Ma'nosini ko'rish uchun ustiga bosing</p>
-            </div>
-
-            <!-- 4. TOKEN DO'KON (10, 20, 60 Token) -->
-            <div id="tab-shop" class="hidden grid md:grid-cols-3 gap-4">
-                <div class="bg-slate-800 p-5 rounded-2xl border border-blue-500/40 text-center">
-                    <h4 class="font-bold text-lg">Maxsus Belgi (Galochka)</h4>
-                    <p class="text-xs text-gray-400 my-2">Profilingiz yonida ko'k belgi chiqadi</p>
-                    <button onclick="buyItem(10, 'badge')" class="mt-2 bg-blue-600 w-full py-2 rounded-xl font-bold text-sm">10 🪙 Token</button>
-                </div>
-                <div class="bg-slate-800 p-5 rounded-2xl border border-purple-500/40 text-center">
-                    <h4 class="font-bold text-lg">Profil Orqa Foni</h4>
-                    <p class="text-xs text-gray-400 my-2">Profilga neon rang qo'shish</p>
-                    <button onclick="buyItem(20, 'color')" class="mt-2 bg-purple-600 w-full py-2 rounded-xl font-bold text-sm">20 🪙 Token</button>
-                </div>
-                <div class="bg-gradient-to-b from-amber-500/20 to-slate-800 p-5 rounded-2xl border border-amber-400 text-center">
-                    <h4 class="font-bold text-lg text-amber-300">FULL PREMIUM NABOR</h4>
-                    <p class="text-xs text-gray-300 my-2">Orqa fon + VIP Belgi + Animatsiya</p>
-                    <button onclick="buyItem(60, 'full')" class="mt-2 bg-amber-500 text-black w-full py-2 rounded-xl font-extrabold text-sm">60 🪙 Token</button>
-                </div>
-            </div>
-
-            <!-- 5. SHAXMAT -->
-            <div id="tab-chess" class="hidden text-center bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                <i class="fa-solid fa-chess-board text-6xl text-blue-400 mb-3"></i>
-                <h3 class="font-bold text-lg">Maktab Shaxmat Arenasi</h3>
-                <p class="text-sm text-gray-400 mt-1">Keyingi qadamda bu yerga haqiqiy o'ynaladigan shaxmat taxtasini (Chess.js) ulaymiz!</p>
-            </div>
-
-        </main>
-    </div>
-
-    <script>
-        // Orqa fonda 4 ta rasm aylanib turishi
-        const images = [
-            "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80",
-            "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80",
-            "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=1200&q=80",
-            "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=1200&q=80"
-        ];
-        let currentImg = 0;
-        const authScreen = document.getElementById('authScreen');
-        function changeBg() {
-            authScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('${images[currentImg]}')`;
-            currentImg = (currentImg + 1) % images.length;
-        }
-        changeBg();
-        setInterval(changeBg, 4000);
-
-        let tokens = 35;
-
-        // Saytga kirish
-        function enterSite() {
-            const uname = document.getElementById('usernameInput').value.trim() || "sardor_07";
-            document.getElementById('userBadge').innerHTML = `@${uname} <span id="vipIcon" class="hidden text-blue-400"><i class="fa-solid fa-circle-check"></i></span>`;
-            authScreen.classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
-        }
-
-        // Bo'limlarni almashtirish
-        function showTab(tabName) {
-            ['feed', 'books', 'english', 'shop', 'chess'].forEach(t => {
-                document.getElementById('tab-' + t).classList.add('hidden');
-            });
-            document.getElementById('tab-' + tabName).classList.remove('hidden');
-        }
-
-        // Post qo'shish va Token olish
-        function addPost() {
-            const text = document.getElementById('postInput').value.trim();
-            if (!text) return;
-            const postHTML = `
-                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
-                    <div class="flex justify-between">
-                        <span class="font-bold text-blue-400">${document.getElementById('userBadge').innerHTML}</span>
-                        <span class="text-xs text-gray-400">Hozirgina</span>
-                    </div>
-                    <p class="text-sm mt-2">${text}</p>
-                </div>`;
-            document.getElementById('postsList').insertAdjacentHTML('afterbegin', postHTML);
-            document.getElementById('postInput').value = '';
-            tokens += 5;
-            document.getElementById('tokenCount').innerText = tokens;
-        }
-
-        // Flashcard aylantirish
-        let isEng = true;
-        function flipCard() {
-            const card = document.getElementById('flashcard');
-            card.innerText = isEng ? "Mo'l-ko'l, serob (O'zbekcha)" : "Abundant";
-            isEng = !isEng;
-        }
-
-        // Token do'konidan xarid qilish
-        function buyItem(cost, type) {
-            if (tokens < cost) {
-                alert("Token yetarli emas! Ko'proq post joylab token yig'ing.");
-                return;
-            }
-            tokens -= cost;
-            document.getElementById('tokenCount').innerText = tokens;
-            if (type === 'badge' || type === 'full') {
-                document.getElementById('vipIcon').classList.remove('hidden');
-            }
-            if (type === 'color' || type === 'full') {
-                document.getElementById('userBadge').classList.add('bg-gradient-to-r', 'from-purple-600', 'to-pink-600');
-            }
-            alert("Tabriklaymiz! Xarid muvaffaqiyatli amalga oshirildi!");
-        }
-    </script>
-</body>
-</html>
+                <div id="userBadge" class="
