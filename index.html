@@ -27,8 +27,8 @@
 </head>
 <body class="bg-slate-900 text-white min-h-screen font-sans">
 
-    <!-- 1. RO'YXATDAN O'TISH / KIRISH OYNASI -->
-    <div id="authScreen" class="bg-slider fixed inset-0 z-50 flex items-center justify-center p-4" style="background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80');">
+    <!-- 1. RO'YXATDAN O'TISH / KIRISH OYNASI (Sening 3 ta rasming aylanadi) -->
+    <div id="authScreen" class="bg-slider fixed inset-0 z-50 flex items-center justify-center p-4" style="background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('2359.jpg');">
         <div class="glass p-8 rounded-3xl shadow-2xl w-full max-w-md">
             <div class="text-center mb-6">
                 <h1 class="text-3xl font-extrabold text-amber-400"><i class="fa-solid fa-graduation-cap"></i> SchoolHub</h1>
@@ -176,7 +176,7 @@
                 <div class="bg-gradient-to-b from-amber-500/20 to-slate-800 p-5 rounded-2xl border border-amber-400 text-center">
                     <h4 class="font-bold text-lg text-amber-300">FULL PREMIUM</h4>
                     <p class="text-xs text-gray-300 my-2">Orqa fon + VIP Belgi + Animatsiya</p>
-                    <button onclick="buyItem(60, 'full')" class="mt-2 bg-amber-400 text-slate-950 w-full py-2 rounded-extravagant font-extrabold text-sm">60 🪙 Token</button>
+                    <button onclick="buyItem(60, 'full')" class="mt-2 bg-amber-400 text-slate-950 w-full py-2 rounded-xl font-extrabold text-sm">60 🪙 Token</button>
                 </div>
             </div>
 
@@ -189,20 +189,16 @@
         </main>
     </div>
 
-    <!-- Oddiy skript (Modulsiz - tugmalar 100% ishlaydi) -->
     <script>
         const SUPABASE_URL = 'https://nbbpengewjhbvcburydh.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_kqXaCVM316G1CppA6_W0JQ_KHWpwrXm';
-        
-        // Supabase client yaratish (global object orqali)
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Orqa fon rasm slideri
+        // O'zing tashlagan 3 ta rasm (2359.jpg, 2360.jpg, 2361.jpg)
         const images = [
-            "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80",
-            "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80",
-            "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=1200&q=80",
-            "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=1200&q=80"
+            "2359.jpg",
+            "2360.jpg",
+            "2361.jpg"
         ];
         let currentImg = 0;
         const authScreen = document.getElementById('authScreen');
@@ -216,7 +212,6 @@
         let isRegisterMode = false;
         let userTokens = 35;
 
-        // Kirish / Ro'yxatdan o'tish rejimini almashtirish
         function toggleAuthMode() {
             isRegisterMode = !isRegisterMode;
             document.getElementById('usernameField').classList.toggle('hidden', !isRegisterMode);
@@ -226,7 +221,6 @@
             document.getElementById('authMessage').textContent = "";
         }
 
-        // Autentifikatsiya amali
         async function handleAuth() {
             const email = document.getElementById('emailInput').value.trim();
             const password = document.getElementById('passwordInput').value;
@@ -312,10 +306,8 @@
             });
         }
 
-        // Sahifa ochilganda sessiyani tekshirish
         checkSession();
 
-        // Bo'limlarni almashtirish
         function showTab(tabName, btnElement) {
             ['feed', 'books', 'english', 'shop', 'chess'].forEach(t => {
                 document.getElementById('tab-' + t).classList.add('hidden');
@@ -332,7 +324,6 @@
             }
         }
 
-        // Post qo'shish
         function addPost() {
             const text = document.getElementById('postInput').value.trim();
             if (!text) return;
@@ -351,7 +342,6 @@
             document.getElementById('tokenCount').innerText = userTokens;
         }
 
-        // Flashcard so'z yodlash
         let isEng = true;
         function flipCard() {
             const card = document.getElementById('flashcard');
@@ -359,7 +349,6 @@
             isEng = !isEng;
         }
 
-        // Token do'koni xaridi
         function buyItem(cost, type) {
             if (userTokens < cost) {
                 alert("Token yetarli emas! Ko'proq post yozib token yig'ing.");
