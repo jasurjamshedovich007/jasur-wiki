@@ -7,7 +7,7 @@
     <title>SchoolHub - O'quvchilar Ijtimoiy Tarmog'i</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Supabase Kutubxonasi -->
+    <!-- Supabase CDN (Global versiya) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .bg-slider {
@@ -171,4 +171,210 @@
                 <div class="bg-slate-800 p-5 rounded-2xl border border-purple-500/40 text-center">
                     <h4 class="font-bold text-lg">Neon Fon</h4>
                     <p class="text-xs text-gray-400 my-2">Profilga maxsus rang qo'shish</p>
-                    <button onclick
+                    <button onclick="buyItem(20, 'color')" class="mt-2 bg-purple-600 w-full py-2 rounded-xl font-bold text-sm">20 🪙 Token</button>
+                </div>
+                <div class="bg-gradient-to-b from-amber-500/20 to-slate-800 p-5 rounded-2xl border border-amber-400 text-center">
+                    <h4 class="font-bold text-lg text-amber-300">FULL PREMIUM</h4>
+                    <p class="text-xs text-gray-300 my-2">Orqa fon + VIP Belgi + Animatsiya</p>
+                    <button onclick="buyItem(60, 'full')" class="mt-2 bg-amber-400 text-slate-950 w-full py-2 rounded-extravagant font-extrabold text-sm">60 🪙 Token</button>
+                </div>
+            </div>
+
+            <!-- 5. SHAXMAT -->
+            <div id="tab-chess" class="hidden text-center bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                <i class="fa-solid fa-chess-board text-6xl text-amber-400 mb-3"></i>
+                <h3 class="font-bold text-lg">Maktab Shaxmat Arenasi</h3>
+                <p class="text-sm text-gray-400 mt-1">Tez kunda onlayn shaxmat taxtasi ishga tushadi!</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Oddiy skript (Modulsiz - tugmalar 100% ishlaydi) -->
+    <script>
+        const SUPABASE_URL = 'https://nbbpengewjhbvcburydh.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_kqXaCVM316G1CppA6_W0JQ_KHWpwrXm';
+        
+        // Supabase client yaratish (global object orqali)
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Orqa fon rasm slideri
+        const images = [
+            "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80",
+            "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80",
+            "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=1200&q=80",
+            "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=1200&q=80"
+        ];
+        let currentImg = 0;
+        const authScreen = document.getElementById('authScreen');
+        
+        function changeBg() {
+            authScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('${images[currentImg]}')`;
+            currentImg = (currentImg + 1) % images.length;
+        }
+        setInterval(changeBg, 4000);
+
+        let isRegisterMode = false;
+        let userTokens = 35;
+
+        // Kirish / Ro'yxatdan o'tish rejimini almashtirish
+        function toggleAuthMode() {
+            isRegisterMode = !isRegisterMode;
+            document.getElementById('usernameField').classList.toggle('hidden', !isRegisterMode);
+            document.getElementById('authSubtitle').textContent = isRegisterMode ? "Jasur Wiki uchun yangi o'quvchi akkaunti yarating." : "Maktab o'quvchilari platformasiga xush kelibsiz.";
+            document.getElementById('authSubmitBtn').textContent = isRegisterMode ? "Ro'yxatdan o'tish" : "Kirish";
+            document.getElementById('switchAuthBtn').textContent = isRegisterMode ? "Akkauntingiz bormi? Kirish" : "Akkauntingiz yo'qmi? Ro'yxatdan o'tish";
+            document.getElementById('authMessage').textContent = "";
+        }
+
+        // Autentifikatsiya amali
+        async function handleAuth() {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            const msgEl = document.getElementById('authMessage');
+            
+            if (!email || !password) {
+                msgEl.textContent = "Email va parolni kiriting!";
+                return;
+            }
+
+            msgEl.textContent = "Kuting...";
+
+            if (isRegisterMode) {
+                const username = document.getElementById('usernameInput').value.trim().toLowerCase();
+                if (!username) {
+                    msgEl.textContent = "Foydalanuvchi nomini (username) kiriting.";
+                    return;
+                }
+                if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                    msgEl.textContent = "Username faqat lotin harflari, raqam va _ bo'lishi mumkin.";
+                    return;
+                }
+
+                try {
+                    const { data: existing } = await supabase.from('profiles').select('username').eq('username', username).single();
+                    if (existing) {
+                        msgEl.textContent = "Bu username band qilingan! Boshqasini tanlang.";
+                        return;
+                    }
+
+                    const { data, error } = await supabase.auth.signUp({
+                        email,
+                        password,
+                        options: { data: { username } }
+                    });
+
+                    if (error) {
+                        msgEl.textContent = "Xato: " + error.message;
+                        return;
+                    }
+
+                    if (data.user) {
+                        await supabase.from('profiles').insert([{ id: data.user.id, username, tokens: 35 }]);
+                        msgEl.textContent = "Muvaffaqiyatli ro'yxatdan o'tdingiz!";
+                        checkSession();
+                    }
+                } catch (err) {
+                    msgEl.textContent = "Tarmoq xatosi!";
+                }
+            } else {
+                const { error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) {
+                    msgEl.textContent = "Kirish xatosi: " + error.message;
+                    return;
+                }
+                checkSession();
+            }
+        }
+
+        async function checkSession() {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session && session.user) {
+                    authScreen.classList.add('hidden');
+                    document.getElementById('mainApp').classList.remove('hidden');
+
+                    const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+                    let uname = profile?.username || session.user.user_metadata?.username || "oquvchi";
+                    userTokens = profile?.tokens ?? 35;
+
+                    document.getElementById('tokenCount').innerText = userTokens;
+                    document.getElementById('userBadge').innerHTML = `@${uname} <span id="vipIcon" class="hidden text-amber-400"><i class="fa-solid fa-circle-check"></i></span>`;
+                    document.getElementById('currentUsernameDisplay').innerText = `@${uname}`;
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        }
+
+        function logout() {
+            supabase.auth.signOut().then(() => {
+                location.reload();
+            });
+        }
+
+        // Sahifa ochilganda sessiyani tekshirish
+        checkSession();
+
+        // Bo'limlarni almashtirish
+        function showTab(tabName, btnElement) {
+            ['feed', 'books', 'english', 'shop', 'chess'].forEach(t => {
+                document.getElementById('tab-' + t).classList.add('hidden');
+            });
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-amber-500', 'text-slate-950');
+                btn.classList.add('bg-slate-800');
+            });
+            if(btnElement) {
+                btnElement.classList.remove('bg-slate-800');
+                btnElement.classList.add('bg-amber-500', 'text-slate-950');
+            }
+        }
+
+        // Post qo'shish
+        function addPost() {
+            const text = document.getElementById('postInput').value.trim();
+            if (!text) return;
+            const uname = document.getElementById('currentUsernameDisplay').innerText;
+            const postHTML = `
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
+                    <div class="flex justify-between">
+                        <span class="font-bold text-amber-400">${uname} <i class="fa-solid fa-circle-check text-xs"></i></span>
+                        <span class="text-xs text-gray-400">Hozirgina</span>
+                    </div>
+                    <p class="text-sm mt-2">${text}</p>
+                </div>`;
+            document.getElementById('postsList').insertAdjacentHTML('afterbegin', postHTML);
+            document.getElementById('postInput').value = '';
+            userTokens += 5;
+            document.getElementById('tokenCount').innerText = userTokens;
+        }
+
+        // Flashcard so'z yodlash
+        let isEng = true;
+        function flipCard() {
+            const card = document.getElementById('flashcard');
+            card.innerText = isEng ? "Mo'l-ko'l, serob (O'zbekcha)" : "Abundant";
+            isEng = !isEng;
+        }
+
+        // Token do'koni xaridi
+        function buyItem(cost, type) {
+            if (userTokens < cost) {
+                alert("Token yetarli emas! Ko'proq post yozib token yig'ing.");
+                return;
+            }
+            userTokens -= cost;
+            document.getElementById('tokenCount').innerText = userTokens;
+            if (type === 'badge' || type === 'full') {
+                document.getElementById('vipIcon').classList.remove('hidden');
+            }
+            if (type === 'color' || type === 'full') {
+                document.getElementById('userBadge').classList.add('bg-gradient-to-r', 'from-purple-600', 'to-pink-600');
+            }
+            alert("Tabriklaymiz! Xarid muvaffaqiyatli amalga oshirildi!");
+        }
+    </script>
+</body>
+</html>
